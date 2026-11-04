@@ -1000,3 +1000,14 @@ function enhanceSelect(select) {
 /* ---------- Démarrage ---------- */
 
 setCatalog();
+
+// Comme fortnite.gg : on arrive directement sur la saison en cours
+// (la plus récente ayant des esprits déjà sortis). « Toutes les saisons »
+// reste disponible dans le menu.
+const currentSeason = spirits
+  .filter(s => !s.unreleased && s.season)
+  .reduce((best, s) => (seasonValue(s.season) > seasonValue(best) ? s.season : best), "");
+if (currentSeason) {
+  seasonFilter.value = currentSeason;
+  seasonFilter.dispatchEvent(new Event("change"));
+}
