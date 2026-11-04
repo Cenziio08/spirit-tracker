@@ -1,8 +1,7 @@
-const CATALOG_URL =
-  "https://raw.githubusercontent.com/valincius/fn-sprites/main/src/sprites.json";
-
 const STORAGE_KEY = "spirit-tracker-progress";
-const CATALOG_CACHE_KEY = "spirit-tracker-catalog";
+
+// Ancien cache du catalogue en ligne (plus utilisé) : on fait le ménage
+localStorage.removeItem("spirit-tracker-catalog");
 
 // Ordre et libellés des raretés (les raretés inconnues passent à la fin)
 const RARITIES = {
@@ -429,25 +428,9 @@ function renderSpirits() {
 
 /* ---------- Catalogue ---------- */
 
-// Fusionne la liste locale (la plus complète) avec le catalogue en ligne :
-// la liste locale fait foi, le catalogue en ligne ajoute seulement
-// les esprits dont le numéro lui est encore inconnu. (Un numéro déjà connu
-// avec une autre variante est une erreur du catalogue en ligne : ignoré.)
-function setCatalog(remote = []) {
-  const merged = new Map();
-  const knownIds = new Set(LOCAL_SPIRITS.map(s => String(s.spriteId)));
-
-  LOCAL_SPIRITS.forEach(spirit => merged.set(getKey(spirit), spirit));
-
-  remote
-    .filter(s => s && s.spriteId != null && s.variant && !knownIds.has(String(s.spriteId)))
-    .forEach(spirit => {
-      const entry = { ...spirit, spriteId: String(spirit.spriteId) };
-      const key = getKey(entry);
-      if (!merged.has(key)) merged.set(key, entry);
-    });
-
-  spirits = [...merged.values()];
+// La liste des esprits vient uniquement de spirits-data.js
+function setCatalog() {
+  spirits = [...LOCAL_SPIRITS];
 
   // Pas de catégorie "Spécial" : chaque variante prend la rareté de son esprit
   // de base (ex. Jonesy Gold -> Rare). La variante reste indiquée par son étiquette.
@@ -461,54 +444,6 @@ function setCatalog(remote = []) {
       : s);
   populateFilters();
   renderSpirits();
-}
-
-async function loadSpirits() {
-  const refreshButton = $("refresh");
-  refreshButton.disabled = true;
-  refreshButton.textContent = "Actualisation...";
-
-  try {
-    const response = await fetch(CATALOG_URL, { cache: "no-store" });
-
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!Array.isArray(data)) {
-      throw new Error("Format du catalogue inattendu.");
-    }
-
-    const previousCount = spirits.length;
-    const unchanged =
-      JSON.stringify(loadJSON(CATALOG_CACHE_KEY, null)?.data) === JSON.stringify(data);
-
-    localStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify({
-      savedAt: Date.now(),
-      data
-    }));
-
-    // Rien de nouveau : on ne réaffiche pas toute la liste (évite de
-    // recharger les images et de faire sauter la page)
-    if (unchanged) return;
-
-    setCatalog(data);
-
-    if (previousCount && spirits.length > previousCount) {
-      toast(`${spirits.length - previousCount} nouvel(s) esprit(s) ajouté(s) !`);
-    }
-  } catch (error) {
-    console.error(error);
-
-    statusElement.textContent = spirits.length
-      ? "Impossible d'actualiser le catalogue : affichage de la dernière version enregistrée."
-      : "Impossible de charger le catalogue. Vérifie ta connexion et réessaie.";
-  } finally {
-    refreshButton.disabled = false;
-    refreshButton.textContent = "Actualiser la liste";
-  }
 }
 
 /* ---------- Sauvegarde ---------- */
@@ -886,7 +821,6 @@ $("status-filter").addEventListener("click", event => {
   renderSpirits();
 });
 
-$("refresh").addEventListener("click", loadSpirits);
 $("export").addEventListener("click", exportProgress);
 $("import").addEventListener("click", () => $("import-file").click());
 $("import-file").addEventListener("change", event => {
@@ -1018,11 +952,4 @@ function enhanceSelect(select) {
 
 /* ---------- Démarrage ---------- */
 
-// Affiche tout de suite la dernière version connue, puis actualise
-const cached = loadJSON(CATALOG_CACHE_KEY, null);
-setCatalog(Array.isArray(cached?.data) ? cached.data : []);
-
-loadSpirits();
-
-// Actualisation automatique toutes les 6 heures
-setInterval(loadSpirits, 6 * 60 * 60 * 1000);
+setCatalog();
