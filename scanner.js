@@ -33,6 +33,7 @@
   const UNKNOWN_MAX_ERROR = 40; // vraie case mais esprit inconnu (nouveauté ?)
   const MIN_LABEL_CONTRAST = 75;
   const TOP_MIN = 100;
+  const TOP_DARK_MAX = 0.15;
   const LABEL_WHITE = 0.2, LABEL_DARK = 0.06;
   const CROWN_MIN_RATIO = 0.003;
 
@@ -465,6 +466,19 @@
     return out;
   }
 
+  // Haut gauche = fond uni de la case. Du texte sombre à cet endroit veut dire
+  // que le cadre est sans doute à cheval : c'est l'étiquette « Niv. » de la
+  // case du dessus. La reconnaissance est alors gardée mais « à vérifier ».
+  function topDarkFraction(t) {
+    let dark = 0, n = 0;
+    for (let v = 1; v < 10; v++) for (let u = 6; u < 62; u++) {
+      const o = (v * TW + u) * 3;
+      if ((t[o] + t[o + 1] + t[o + 2]) / 3 < 70) dark++;
+      n++;
+    }
+    return dark / n;
+  }
+
   // Est-ce bien une case ? (haut clair + étiquette blanche avec texte sombre)
   function looksLikeTile(t) {
     const top = [];
@@ -632,12 +646,49 @@
   // Analyse d'un emplacement : null si ce n'est pas une case d'esprit possédé.
   // `lattice` (grille droite d'une capture nette) autorise aussi les cases
   // coupées par le défilement, avec le seuil strict d'origine.
-  function tryCell(img, R, cx, cy, w, h, ang, unknown, lattice = null) {
+  function tryCell(img, R, cx, cy, w, h, ang, unknown, lattice = null, realign = false) {
+    if (lattice) return tryCellOnce(img, R, cx, cy, w, h, ang, unknown, lattice);
+    let best = tryCellOnce(img, R, cx, cy, w, h, ang, null, null, UNKNOWN_MAX_ERROR);
+    if (!best && realign) {
+      // case repérée approximativement (photo délavée, très penchée) : le
+      // contrôle « est-ce une case ? » rate car le cadre est décalé. On
+      // cherche d'abord l'icône sans ce contrôle, on se recentre dessus, puis
+      // on refait le contrôle normalement.
+      const loose = tryCellOnce(img, R, cx, cy, w, h, ang, null, null, MAX_ERROR, true);
+      if (loose && Math.hypot(loose.cx - cx, loose.cy - cy) <= 0.25 * w) {
+        cx = loose.cx; cy = loose.cy;
+        best = tryCellOnce(img, R, cx, cy, w, h, ang, null, null, UNKNOWN_MAX_ERROR);
+      }
+    }
+    // On accepte d'abord large (vraie case mais mal cadrée), puis on recadre.
+    // le recadrage ne doit pas glisser vers la case voisine (à cheval sur deux)
+    const close = t => t && Math.hypot(t.cx - cx, t.cy - cy) <= 0.18 * w;
+    if (!close(best)) return null;
+    // Photo : la case est souvent un peu décalée / tournée par rapport à la
+    // prédiction. On recadre sur l'icône trouvée et on réessaie (léger angle
+    // et taille en plus) tant que ça s'améliore.
+    for (let round = 0; round < 3 && best.error > 14; round++) {
+      let improved = false;
+      const from = best;
+      for (const [da, ds] of [[0, 1], [-1.5, 1], [1.5, 1], [0, 0.96], [0, 1.04]]) {
+        const t = tryCellOnce(img, R, from.cx, from.cy, from.w * ds, from.h * ds, from.ang + da, null, null, UNKNOWN_MAX_ERROR);
+        if (close(t) && t.error < best.error - 0.3) { best = t; improved = true; }
+      }
+      if (!improved) break;
+    }
+    if (best.error > MAX_ERROR) {
+      if (unknown) unknown.push({ cx: best.cx, cy: best.cy, w: best.w, raw: best.raw });
+      return null;
+    }
+    return best;
+  }
+
+  function tryCellOnce(img, R, cx, cy, w, h, ang, unknown, lattice = null, maxError = MAX_ERROR, noGate = false) {
     const raw = warpTile(img, cx, cy, w, h, ang);
     const cal = calibrate(raw);
     let t, limit, complete = true;
-    if (cal && looksLikeTile(cal)) {
-      t = cal; limit = MAX_ERROR;
+    if (cal && (noGate || looksLikeTile(cal))) {
+      t = cal; limit = maxError;
     } else if (lattice) {
       t = cal || raw; limit = STRICT_MAX_ERROR; complete = false;
     } else {
@@ -663,6 +714,7 @@
       // case coupée en haut : couronne peut-être invisible
       crownCertain: crowned || complete || !!lattice?.topVisible,
       selected: sc > 1.08,
+      shifted: complete && topDarkFraction(t) > TOP_DARK_MAX,
       raw
     };
   }
@@ -788,11 +840,12 @@
     const fromLattice = acc.length;
     for (const s of seeds) {
       if (near(s.cx, s.cy, acc, 0.45)) continue;
-      const t = tryCell(img, R, s.cx, s.cy, s.w, s.h, s.ang, unknown);
+      const t = tryCell(img, R, s.cx, s.cy, s.w, s.h, s.ang, unknown, null, true);
       if (t) acc.push(t);
       if (acc.length - fromLattice >= 8) break;
     }
     await tick();
+    if (window.SPIRIT_SCANNER_DEBUG) window.SPIRIT_SCANNER_SEEDS = { lattice: lattice.length, seeds, acc: acc.map(t => [t.key, t.error, t.cx, t.cy, t.w]) };
     if (!acc.length) return { cells: [], doubtful: [], unknown };
 
     for (let pass = 0; pass < 2; pass++) {
@@ -830,7 +883,7 @@
     // Seules les reconnaissances nettes (score bas ET bien meilleur que le
     // 2e candidat) sont appliquées ; les autres sont proposées "à vérifier".
     // Sur une capture nette, une très forte ressemblance suffit.
-    const sure = t => (t.error <= SURE_MAX_ERROR && t.second - t.error >= SURE_MARGIN) ||
+    const sure = t => (!t.shifted && t.error <= SURE_MAX_ERROR && t.second - t.error >= SURE_MARGIN) ||
       (screenshot && t.error <= 20);
     return { cells: acc.filter(sure), doubtful: acc.filter(t => !sure(t)), unknown: realUnknown };
   }
@@ -897,5 +950,5 @@
     return { found, doubtful: [...doubtful.values()], unknown, files: files.length, cells: cellsTotal };
   }
 
-  window.SpiritScanner = { scan };
+  window.SpiritScanner = { scan, _debug: { warpTile, calibrate, looksLikeTile, matchTile, loadRefs, loadImage, findSeeds } };
 })();

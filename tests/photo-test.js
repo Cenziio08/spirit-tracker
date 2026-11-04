@@ -27,6 +27,7 @@ export async function run({ levels = ["png", "facile", "moyen", "dur"], bases } 
       const crown = [...res.found.values()].filter(f => f.key in ref && f.crowned !== ref[f.key]).map(f => f.key);
       const doubt = res.doubtful || [];
       const doubtOk = doubt.filter(d => d.key in ref && !res.found.has(d.key)).length;
+      window.__progress = `${rows.length + 1} images (${base}_${level} : ${ms} ms)`;
       rows.push({ photo: `${base}_${level}`, ok: keys.length - missing.length, attendus: keys.length, faux: wrong, couronnes: crown, aVerifier: doubt.length, aVerifierJustes: doubtOk, ms });
       const t = (totals[level] ||= { attendus: 0, trouves: 0, faux: 0, couronnes: 0, aVerifier: 0, aVerifierJustes: 0, ms: 0 });
       t.attendus += keys.length; t.trouves += keys.length - missing.length;
