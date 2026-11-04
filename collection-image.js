@@ -9,6 +9,50 @@
   const CELL_W = 104, CELL_H = 146, ICON = 92;
   const COL_GAP = 56, MARGIN = 48, HEADER = 190, FOOTER = 70;
 
+  // Couleurs du thème choisi, résolues en vraies couleurs (les variables CSS
+  // peuvent contenir color-mix(), que le canvas ne comprend pas)
+  function themeColors() {
+    const probe = document.createElement("span");
+    probe.style.display = "none";
+    document.body.append(probe);
+    // couleur peinte sur 1 pixel puis relue : donne toujours "rgba(r, g, b, a)"
+    // (le navigateur peut renvoyer "color(srgb …)" pour un color-mix)
+    const pixel = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+    const read = v => {
+      probe.style.color = `var(${v})`;
+      pixel.clearRect(0, 0, 1, 1);
+      pixel.fillStyle = getComputedStyle(probe).color;
+      pixel.fillRect(0, 0, 1, 1);
+      const [r, g, b, a] = pixel.getImageData(0, 0, 1, 1).data;
+      return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(3)})`;
+    };
+    const c = {
+      bg: read("--bg"), panel: read("--panel"), surface: read("--surface"),
+      text: read("--text"), muted: read("--muted"), accent: read("--accent"),
+      accentText: read("--accent-text"), line: read("--line-strong"),
+      owned: read("--owned"), gold: read("--gold"), veil: read("--bg-veil")
+    };
+    probe.remove();
+    const custom = document.documentElement.dataset.theme === "perso";
+    c.image = custom && window.SpiritTheme ? window.SpiritTheme.image() : "";
+    return c;
+  }
+
+  // "rgb(1, 2, 3)" ou "rgba(…)" -> même couleur avec une autre opacité
+  function withAlpha(color, alpha) {
+    const m = color.match(/[\d.]+/g) || [0, 0, 0];
+    return `rgba(${m[0]}, ${m[1]}, ${m[2]}, ${alpha})`;
+  }
+
+  function loadUrl(url) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+  }
+
   function loadIcon(spirit) {
     return new Promise(resolve => {
       const img = new Image();
@@ -56,7 +100,7 @@
     ctx.restore();
   }
 
-  function drawCheck(ctx, cx, cy, state) {
+  function drawCheck(ctx, cx, cy, state, T) {
     const s = 26;
     roundRect(ctx, cx - s / 2, cy - s / 2, s, s, 6);
     if (state.owned) {
@@ -72,21 +116,21 @@
       ctx.lineTo(cx + 7, cy - 5);
       ctx.stroke();
     } else {
-      ctx.fillStyle = "rgba(20,20,32,0.7)";
+      ctx.fillStyle = withAlpha(T.panel, 0.75);
       ctx.fill();
-      ctx.strokeStyle = "#5c5e78";
+      ctx.strokeStyle = T.line;
       ctx.lineWidth = 2;
       ctx.stroke();
     }
   }
 
-  function statPill(ctx, x, y, big, total, label) {
+  function statPill(ctx, x, y, big, total, label, T) {
     const w = 150, h = 62;
     roundRect(ctx, x, y, w, h, 10);
-    ctx.fillStyle = "rgba(255,255,255,0.08)";
+    ctx.fillStyle = withAlpha(T.panel, 0.8);
     ctx.fill();
     ctx.textAlign = "center";
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = T.text;
     ctx.font = "bold 26px system-ui, 'Segoe UI', Arial, sans-serif";
     const bigW = ctx.measureText(String(big)).width;
     ctx.font = "16px system-ui, 'Segoe UI', Arial, sans-serif";
@@ -96,9 +140,10 @@
     ctx.font = "bold 26px system-ui, 'Segoe UI', Arial, sans-serif";
     ctx.fillText(String(big), start, y + 32);
     ctx.font = "16px system-ui, 'Segoe UI', Arial, sans-serif";
-    ctx.fillStyle = "#a9abc2";
+    ctx.fillStyle = T.muted;
     ctx.fillText(` / ${total}`, start + bigW, y + 32);
     ctx.textAlign = "center";
+    ctx.fillStyle = T.muted;
     ctx.font = "bold 11px system-ui, 'Segoe UI', Arial, sans-serif";
     ctx.fillText(label, x + w / 2, y + 52);
   }
@@ -140,31 +185,37 @@
     canvas.height = H;
     const ctx = canvas.getContext("2d");
 
-    // fond
-    const bg = ctx.createLinearGradient(0, 0, W, H);
-    bg.addColorStop(0, "#2a1d52");
-    bg.addColorStop(0.45, "#151729");
-    bg.addColorStop(1, "#0e0f19");
-    ctx.fillStyle = bg;
+    // fond aux couleurs du thème (ou image de « Mon thème » + voile)
+    const T = themeColors();
+    ctx.fillStyle = T.bg;
     ctx.fillRect(0, 0, W, H);
-    const glow = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, W * 0.7);
-    glow.addColorStop(0, "rgba(142,121,255,0.25)");
-    glow.addColorStop(1, "rgba(142,121,255,0)");
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, W, H);
+    const bgImage = T.image ? await loadUrl(T.image) : null;
+    if (bgImage) {
+      const k = Math.max(W / bgImage.width, H / bgImage.height);
+      const iw = bgImage.width * k, ih = bgImage.height * k;
+      ctx.drawImage(bgImage, (W - iw) / 2, (H - ih) / 2, iw, ih);
+      ctx.fillStyle = T.veil;
+      ctx.fillRect(0, 0, W, H);
+    } else {
+      const glow = ctx.createRadialGradient(W / 2, 0, 0, W / 2, 0, W * 0.8);
+      glow.addColorStop(0, withAlpha(T.accent, 0.3));
+      glow.addColorStop(1, withAlpha(T.accent, 0));
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, W, H);
+    }
 
     // en-tête
     const owned = list.filter(s => getState(s).owned).length;
     const mastered = list.filter(s => getState(s).mastered).length;
     ctx.textAlign = "center";
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = T.text;
     ctx.font = "bold 34px system-ui, 'Segoe UI', Arial, sans-serif";
     ctx.fillText("SPIRIT TRACKER", W / 2, 58);
-    ctx.fillStyle = "#c9c2ff";
+    ctx.fillStyle = T.accentText;
     ctx.font = "18px system-ui, 'Segoe UI', Arial, sans-serif";
     ctx.fillText(seasonFilter.value ? seasonLabel(seasonFilter.value) : "Toutes les saisons", W / 2, 88);
-    statPill(ctx, W / 2 - 160, 106, owned, list.length, "POSSÉDÉS");
-    statPill(ctx, W / 2 + 10, 106, mastered, list.length, "MAÎTRISÉS");
+    statPill(ctx, W / 2 - 160, 106, owned, list.length, "POSSÉDÉS", T);
+    statPill(ctx, W / 2 + 10, 106, mastered, list.length, "MAÎTRISÉS", T);
 
     // esprits
     const icons = await Promise.all(list.map(loadIcon));
@@ -183,7 +234,7 @@
             ctx.restore();
           }
           if (state.mastered) drawCrown(ctx, cx + 10, top + 2, 26);
-          drawCheck(ctx, cx, top + 14 + ICON + 18, state);
+          drawCheck(ctx, cx, top + 14 + ICON + 18, state, T);
         });
       });
       x0 += colW[c] + COL_GAP;
@@ -191,7 +242,7 @@
 
     // pied de page
     ctx.textAlign = "center";
-    ctx.fillStyle = "#8e8fa8";
+    ctx.fillStyle = T.muted;
     ctx.font = "15px system-ui, 'Segoe UI', Arial, sans-serif";
     const date = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
     ctx.fillText(`cenziio08.github.io/spirit-tracker · ${date}`, W / 2, H - 30);

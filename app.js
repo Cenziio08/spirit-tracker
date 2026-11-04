@@ -89,7 +89,20 @@ function askPersistentStorage() {
 function saveProgress() {
   askPersistentStorage();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  window.SpiritProgress.onSave?.(); // synchronisation (sync.js), si active
 }
+
+// Accès à la progression pour la synchronisation en ligne (sync.js)
+window.SpiritProgress = {
+  get: () => progress,
+  // remplace la progression par celle venue d'un autre appareil
+  replace(next) {
+    progress = next;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    if (spirits.length) renderSpirits();
+  },
+  onSave: null
+};
 
 function getKey(spirit) {
   return `${spirit.spriteId}-${spirit.variant}`;
