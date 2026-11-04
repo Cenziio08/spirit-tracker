@@ -107,8 +107,11 @@
   // (sauf s'ils sont déjà possédés).
   function pickSpirits() {
     const season = seasonFilter.value;
-    return spirits.filter(s =>
+    const list = spirits.filter(s =>
       (!season || s.season === season) && (!s.unreleased || getState(s).owned));
+    // toutes les saisons : rangées de la plus récente à la plus ancienne
+    // (sort est stable : l'ordre du jeu est gardé dans chaque saison)
+    return season ? list : list.sort((a, b) => seasonValue(b.season) - seasonValue(a.season));
   }
 
   async function buildImage() {

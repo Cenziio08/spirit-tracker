@@ -293,7 +293,15 @@ function getVisibleSpirits() {
     status: (a, b) => statusRank(a) - statusRank(b) || byName(a, b)
   };
 
-  return filtered.sort(sorters[sortElement.value] || byName);
+  // « Toutes les saisons » : rangé par saison (la plus récente d'abord),
+  // puis par nom, comme sur fortnite.gg
+  const sortBy = !season && sortElement.value === "name" ? "season" : sortElement.value;
+  return filtered.sort(sorters[sortBy] || byName);
+}
+
+// Titres de saison dans la grille quand les esprits sont rangés par saison
+function showsSeasonHeadings() {
+  return !seasonFilter.value && ["name", "season"].includes(sortElement.value);
 }
 
 /* ---------- Cartes ---------- */
@@ -420,7 +428,22 @@ function renderSpirits() {
   const visible = getVisibleSpirits();
   const fragment = document.createDocumentFragment();
 
-  visible.forEach(spirit => fragment.append(createCard(spirit)));
+  const headings = showsSeasonHeadings();
+  let lastSeason = null;
+  visible.forEach(spirit => {
+    if (headings && spirit.season !== lastSeason) {
+      lastSeason = spirit.season;
+      const count = visible.filter(s => s.season === spirit.season).length;
+      const title = document.createElement("h2");
+      title.className = "season-heading";
+      title.textContent = spirit.season ? seasonLabel(spirit.season) : "Autres";
+      const small = document.createElement("span");
+      small.textContent = `${count} esprit(s)`;
+      title.append(small);
+      fragment.append(title);
+    }
+    fragment.append(createCard(spirit));
+  });
   spiritsElement.replaceChildren(fragment);
 
   emptyElement.hidden = visible.length > 0 || spirits.length === 0;

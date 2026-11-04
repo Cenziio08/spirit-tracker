@@ -668,6 +668,29 @@ select {
   padding-top: 10px;
 }
 
+/* titre de saison quand on affiche « Toutes les saisons » */
+.season-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 14px 0 -4px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 20px;
+  letter-spacing: 0.5px;
+}
+
+.season-heading:first-child {
+  margin-top: 0;
+}
+
+.season-heading span {
+  font-size: 13px;
+  font-weight: normal;
+  opacity: 0.6;
+}
+
 .card {
   --rarity: var(--rarity-unknown);
   position: relative;
