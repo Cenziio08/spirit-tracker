@@ -1040,9 +1040,14 @@ const THEMES = [
   ["rose", "Rose bonbon", "#2a1729", "#e0479e"]
 ];
 
+const CUSTOM_KEY = "spirit-tracker-custom-theme";
+const CUSTOM_BG_KEY = "spirit-tracker-custom-bg";
+
 function applyTheme(theme) {
   if (theme) document.documentElement.dataset.theme = theme;
   else delete document.documentElement.dataset.theme;
+  if (theme === "perso") SpiritTheme.applyCustom();
+  else SpiritTheme.clearCustom();
   try {
     if (theme) localStorage.setItem(THEME_KEY, theme);
     else localStorage.removeItem(THEME_KEY);
@@ -1058,24 +1063,39 @@ function applyTheme(theme) {
   if (!toggle || !menu) return;
   const current = document.documentElement.dataset.theme || "";
 
-  THEMES.forEach(([value, label, bg, accent]) => {
+  const addOption = (value, label, swatchBg, onClick, extraClass = "") => {
     const option = document.createElement("button");
     option.type = "button";
-    option.className = "theme-option";
+    option.className = "theme-option " + extraClass;
     option.setAttribute("role", "menuitemradio");
     option.setAttribute("aria-checked", String(value === current));
     option.dataset.theme = value;
     const swatch = document.createElement("span");
     swatch.className = "theme-swatch";
-    swatch.style.background = `linear-gradient(135deg, ${bg} 50%, ${accent} 50%)`;
+    swatch.style.background = swatchBg;
     option.append(swatch, label);
     option.addEventListener("click", () => {
-      applyTheme(value);
       close();
-      toggle.focus();
+      onClick();
     });
     menu.append(option);
+    return option;
+  };
+
+  THEMES.forEach(([value, label, bg, accent]) => {
+    addOption(value, label, `linear-gradient(135deg, ${bg} 50%, ${accent} 50%)`, () => {
+      applyTheme(value);
+      toggle.focus();
+    });
   });
+  const customOption = addOption("perso", "Mon thème…", "", () => openCustomTheme(), "theme-custom-option");
+  const paintCustomSwatch = () => {
+    const c = SpiritTheme.load(), img = SpiritTheme.image();
+    customOption.querySelector(".theme-swatch").style.background = img
+      ? `center / cover url("${img}")`
+      : `linear-gradient(135deg, ${c.bg} 50%, ${c.accent} 50%)`;
+  };
+  paintCustomSwatch();
 
   function close() {
     menu.hidden = true;
@@ -1093,6 +1113,103 @@ function applyTheme(theme) {
   document.addEventListener("keydown", event => {
     if (event.key === "Escape" && !menu.hidden) { close(); toggle.focus(); }
   });
+
+  /* --- « Mon thème » : couleurs au choix et image de la galerie --- */
+
+  const dialog = $("custom-theme");
+  const inputs = { bg: $("ct-bg"), panel: $("ct-panel"), accent: $("ct-accent"), dim: $("ct-dim"), glass: $("ct-glass") };
+  const preview = $("ct-preview");
+  const fileInput = $("ct-file");
+
+  function readForm() {
+    return {
+      bg: inputs.bg.value, panel: inputs.panel.value, accent: inputs.accent.value,
+      dim: Number(inputs.dim.value), glass: Number(inputs.glass.value)
+    };
+  }
+
+  function save(c) {
+    try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(c)); } catch (e) { /* ignoré */ }
+  }
+
+  function refreshImageUI() {
+    const img = SpiritTheme.image();
+    preview.style.backgroundImage = img ? `url("${img}")` : "none";
+    preview.textContent = img ? "" : "Aucune";
+    $("ct-remove").hidden = !img;
+    // voile et transparence ne servent qu'avec une image
+    [inputs.dim, inputs.glass].forEach(i => {
+      i.disabled = !img;
+      i.closest("label").classList.toggle("is-disabled", !img);
+    });
+  }
+
+  function update() {
+    const c = readForm();
+    save(c);
+    applyTheme("perso");
+    paintCustomSwatch();
+  }
+
+  function openCustomTheme() {
+    const c = SpiritTheme.load();
+    Object.entries(inputs).forEach(([k, input]) => { input.value = c[k]; });
+    refreshImageUI();
+    applyTheme("perso");
+    dialog.showModal();
+  }
+
+  Object.values(inputs).forEach(input => input.addEventListener("input", update));
+
+  $("ct-pick").addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files[0];
+    fileInput.value = "";
+    if (!file) return;
+    try {
+      const dataUrl = await shrinkImage(file);
+      localStorage.setItem(CUSTOM_BG_KEY, dataUrl);
+    } catch (e) {
+      console.error(e);
+      toast("Impossible d'utiliser cette image, essaie une autre.");
+      return;
+    }
+    refreshImageUI();
+    update();
+  });
+
+  $("ct-remove").addEventListener("click", () => {
+    try { localStorage.removeItem(CUSTOM_BG_KEY); } catch (e) { /* ignoré */ }
+    refreshImageUI();
+    update();
+  });
+
+  $("ct-reset").addEventListener("click", () => {
+    try {
+      localStorage.removeItem(CUSTOM_KEY);
+      localStorage.removeItem(CUSTOM_BG_KEY);
+    } catch (e) { /* ignoré */ }
+    dialog.close();
+    paintCustomSwatch();
+    applyTheme("");
+  });
+
+  // Photo de la galerie -> JPEG d'au plus 1600 px (une photo de téléphone
+  // brute ne tiendrait pas dans la mémoire du navigateur)
+  async function shrinkImage(file) {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close?.();
+    for (const quality of [0.82, 0.7, 0.55]) {
+      const url = canvas.toDataURL("image/jpeg", quality);
+      if (url.length < 1.5e6) return url;
+    }
+    return canvas.toDataURL("image/jpeg", 0.4);
+  }
 })();
 
 /* ---------- Démarrage ---------- */

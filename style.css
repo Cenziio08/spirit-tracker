@@ -1313,3 +1313,193 @@ select {
     right: 8px;
   }
 }
+
+/* ---------- Thème personnalisé (« Mon thème ») ---------- */
+/* --bg, --panel, --accent, --text sont posés par SpiritTheme.applyCustom() */
+
+:root[data-theme="perso"] {
+  --border: color-mix(in srgb, var(--text) 16%, var(--panel));
+  --surface: color-mix(in srgb, var(--text) 9%, var(--panel));
+  --surface-hover: color-mix(in srgb, var(--text) 16%, var(--panel));
+  --muted: color-mix(in srgb, var(--text) 68%, var(--bg));
+  --soft: color-mix(in srgb, var(--text) 85%, var(--bg));
+  --line: color-mix(in srgb, var(--text) 22%, var(--panel));
+  --line-strong: color-mix(in srgb, var(--text) 45%, var(--panel));
+  --accent-hover: color-mix(in srgb, var(--accent) 80%, #fff);
+  --accent-line: color-mix(in srgb, var(--accent) 45%, var(--panel));
+  --accent-text: color-mix(in srgb, var(--accent) 55%, var(--text));
+  --header-bg: linear-gradient(135deg, color-mix(in srgb, var(--accent) 45%, var(--bg)), var(--bg));
+}
+
+/* fond clair choisi : mêmes réglages de lisibilité que le thème Clair */
+:root[data-theme="perso"][data-light] {
+  --warn: #a35a00;
+  --danger: #c0264f;
+  --owned: #1b9a3c;
+  --gold: #a88400;
+  --rarity-common: #6e6e6e;
+  --rarity-uncommon: #2c9a38;
+  --rarity-rare: #1677d2;
+  --rarity-epic: #9338dc;
+  --rarity-legendary: #d66d0a;
+  --rarity-mythic: #b88a00;
+  color-scheme: light;
+}
+
+/* image de fond : fixe derrière la page (marche aussi sur iPhone), avec un
+   voile de la couleur du fond pour garder le texte lisible */
+:root[data-theme="perso"][data-bg-image] body {
+  background: transparent;
+}
+
+:root[data-theme="perso"][data-bg-image] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(var(--bg-veil), var(--bg-veil)),
+    var(--bg-image) center / cover no-repeat,
+    var(--bg);
+}
+
+:root[data-theme="perso"][data-bg-image] header {
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+}
+
+/* fenêtre de réglage */
+.custom-theme {
+  width: min(440px, calc(100vw - 24px));
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+:root[data-bg-image] .custom-theme {
+  background: var(--bg);
+}
+
+.custom-theme::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.custom-theme h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+}
+
+.custom-theme h3 {
+  margin: 20px 0 10px;
+  font-size: 15px;
+}
+
+.custom-colors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.custom-colors label {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.custom-colors input[type="color"] {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 2px solid var(--line-strong);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.custom-colors input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.custom-colors input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.custom-colors input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.custom-image-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.custom-preview {
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface) center / cover no-repeat;
+  display: grid;
+  place-content: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.custom-image-buttons {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+}
+
+.custom-image-buttons button {
+  padding: 10px;
+  font-size: 14px;
+}
+
+.custom-range {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--soft);
+}
+
+.custom-range input {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.custom-range.is-disabled {
+  opacity: 0.45;
+}
+
+.custom-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.custom-actions button {
+  padding: 11px 16px;
+  font-size: 14px;
+}
+
+.theme-option.theme-custom-option {
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 8px 8px;
+  margin-top: 2px;
+}

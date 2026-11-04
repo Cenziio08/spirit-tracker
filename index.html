@@ -6,12 +6,55 @@
   <title>Spirit Tracker</title>
   <!-- ?v=… : numéro de version à changer à chaque mise à jour, pour que les
        navigateurs téléchargent les nouveaux fichiers au lieu de garder l'ancien cache -->
-  <link rel="stylesheet" href="style.css?v=2026-11-04.10">
+  <link rel="stylesheet" href="style.css?v=2026-11-04.11">
   <!-- thème choisi, appliqué tout de suite (pas de flash de l'ancien thème) -->
   <script>
+    // Thème personnalisé : couleurs et image choisies par la personne.
+    // Défini ici (et pas dans app.js) pour s'appliquer avant l'affichage.
+    window.SpiritTheme = {
+      DEFAULTS: { bg: "#10111b", panel: "#1b1c2b", accent: "#7651e8", dim: 55, glass: 25 },
+      load() {
+        try {
+          return { ...this.DEFAULTS, ...JSON.parse(localStorage.getItem("spirit-tracker-custom-theme") || "{}") };
+        } catch (e) { return { ...this.DEFAULTS }; }
+      },
+      image() {
+        try { return localStorage.getItem("spirit-tracker-custom-bg") || ""; } catch (e) { return ""; }
+      },
+      // clair ou foncé ? (luminance perçue)
+      isLight(hex) {
+        const n = parseInt(hex.slice(1), 16);
+        return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) > 150;
+      },
+      rgba(hex, alpha) {
+        const n = parseInt(hex.slice(1), 16);
+        return `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+      },
+      applyCustom(c = this.load(), img = this.image()) {
+        const root = document.documentElement, st = root.style;
+        const light = this.isLight(c.bg);
+        root.toggleAttribute("data-light", light);
+        root.toggleAttribute("data-bg-image", !!img);
+        st.setProperty("--bg", c.bg);
+        st.setProperty("--panel", img ? this.rgba(c.panel, 1 - c.glass / 100) : c.panel);
+        st.setProperty("--accent", c.accent);
+        st.setProperty("--text", light ? "#191a2c" : "#f5f5ff");
+        st.setProperty("--on-accent", this.isLight(c.accent) ? "#1a1a1a" : "#ffffff");
+        st.setProperty("--bg-veil", this.rgba(c.bg, c.dim / 100));
+        st.setProperty("--bg-image", img ? `url("${img}")` : "none");
+      },
+      clearCustom() {
+        const root = document.documentElement;
+        ["--bg", "--panel", "--accent", "--text", "--on-accent", "--bg-veil", "--bg-image"]
+          .forEach(v => root.style.removeProperty(v));
+        root.removeAttribute("data-light");
+        root.removeAttribute("data-bg-image");
+      }
+    };
     try {
       const theme = localStorage.getItem("spirit-tracker-theme");
       if (theme) document.documentElement.dataset.theme = theme;
+      if (theme === "perso") window.SpiritTheme.applyCustom();
     } catch (e) {}
   </script>
 </head>
@@ -129,10 +172,43 @@
 
   <div id="toast" class="toast" role="status" hidden></div>
 
-  <script src="spirits-data.js?v=2026-11-04.10"></script>
-  <script src="spirits-fingerprints.js?v=2026-11-04.10" defer></script>
-  <script src="scanner.js?v=2026-11-04.10" defer></script>
-  <script src="app.js?v=2026-11-04.10"></script>
-  <script src="collection-image.js?v=2026-11-04.10"></script>
+  <!-- Thème personnalisé : couleurs au choix + fond pris dans la galerie -->
+  <dialog id="custom-theme" class="custom-theme" aria-labelledby="custom-theme-title">
+    <form method="dialog">
+      <h2 id="custom-theme-title">🎨 Mon thème</h2>
+      <div class="custom-colors">
+        <label>Fond <input type="color" id="ct-bg"></label>
+        <label>Cartes <input type="color" id="ct-panel"></label>
+        <label>Boutons <input type="color" id="ct-accent"></label>
+      </div>
+
+      <h3>Image de fond</h3>
+      <div class="custom-image-row">
+        <div id="ct-preview" class="custom-preview" aria-hidden="true"></div>
+        <div class="custom-image-buttons">
+          <button type="button" id="ct-pick">🖼️ Choisir une image</button>
+          <button type="button" id="ct-remove" class="secondary">Retirer l'image</button>
+        </div>
+      </div>
+      <input type="file" id="ct-file" accept="image/*" hidden>
+      <label class="custom-range">Voile sur l'image (pour bien lire)
+        <input type="range" id="ct-dim" min="0" max="90" step="5">
+      </label>
+      <label class="custom-range">Cartes transparentes
+        <input type="range" id="ct-glass" min="0" max="70" step="5">
+      </label>
+
+      <div class="custom-actions">
+        <button type="button" id="ct-reset" class="secondary">Revenir au violet</button>
+        <button type="submit" value="ok">Terminé</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="spirits-data.js?v=2026-11-04.11"></script>
+  <script src="spirits-fingerprints.js?v=2026-11-04.11" defer></script>
+  <script src="scanner.js?v=2026-11-04.11" defer></script>
+  <script src="app.js?v=2026-11-04.11"></script>
+  <script src="collection-image.js?v=2026-11-04.11"></script>
 </body>
 </html>
