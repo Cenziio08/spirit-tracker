@@ -242,8 +242,13 @@ function matchesStatus(state) {
   }
 }
 
+// Minuscules sans accents : "Légendaire" et "legendaire" se trouvent pareil
+function normalize(text) {
+  return String(text).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
 function getVisibleSpirits() {
-  const search = searchElement.value.toLowerCase().trim();
+  const search = normalize(searchElement.value.trim());
   const rarity = rarityFilter.value;
   const variant = variantFilter.value;
   const season = seasonFilter.value;
@@ -259,9 +264,9 @@ function getVisibleSpirits() {
       rarityLabel(spirit.rarity),
       seasonLabel(spirit.season),
       spirit.unreleased ? "pas encore sorti bientôt leak" : ""
-    ].join(" ").toLowerCase();
+    ].join(" ");
 
-    return text.includes(search)
+    return normalize(text).includes(search)
       && (!rarity || spirit.rarity === rarity)
       && (!variant || spirit.variant === variant)
       && (!season || spirit.season === season)
@@ -426,17 +431,20 @@ function renderSpirits() {
 
 // Fusionne la liste locale (la plus complète) avec le catalogue en ligne :
 // la liste locale fait foi, le catalogue en ligne ajoute seulement
-// les esprits qu'elle ne connaît pas encore.
+// les esprits dont le numéro lui est encore inconnu. (Un numéro déjà connu
+// avec une autre variante est une erreur du catalogue en ligne : ignoré.)
 function setCatalog(remote = []) {
   const merged = new Map();
+  const knownIds = new Set(LOCAL_SPIRITS.map(s => String(s.spriteId)));
 
   LOCAL_SPIRITS.forEach(spirit => merged.set(getKey(spirit), spirit));
 
   remote
-    .filter(s => s && s.spriteId != null && s.variant)
+    .filter(s => s && s.spriteId != null && s.variant && !knownIds.has(String(s.spriteId)))
     .forEach(spirit => {
-      const key = getKey(spirit);
-      if (!merged.has(key)) merged.set(key, { ...spirit, spriteId: String(spirit.spriteId) });
+      const entry = { ...spirit, spriteId: String(spirit.spriteId) };
+      const key = getKey(entry);
+      if (!merged.has(key)) merged.set(key, entry);
     });
 
   spirits = [...merged.values()];
@@ -474,11 +482,17 @@ async function loadSpirits() {
     }
 
     const previousCount = spirits.length;
+    const unchanged =
+      JSON.stringify(loadJSON(CATALOG_CACHE_KEY, null)?.data) === JSON.stringify(data);
 
     localStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify({
       savedAt: Date.now(),
       data
     }));
+
+    // Rien de nouveau : on ne réaffiche pas toute la liste (évite de
+    // recharger les images et de faire sauter la page)
+    if (unchanged) return;
 
     setCatalog(data);
 
@@ -508,7 +522,8 @@ function exportProgress() {
   link.href = URL.createObjectURL(blob);
   link.download = `spirit-tracker-${new Date().toISOString().slice(0, 10)}.json`;
   link.click();
-  URL.revokeObjectURL(link.href);
+  // libéré un peu plus tard : certains navigateurs annulent le téléchargement sinon
+  setTimeout(() => URL.revokeObjectURL(link.href), 10000);
   toast("Progression exportée.");
 }
 
