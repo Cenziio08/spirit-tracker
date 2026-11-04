@@ -11,6 +11,7 @@ async function load(path) {
 }
 
 export async function run({ levels = ["png", "facile", "moyen", "dur"], bases } = {}) {
+  if (!window.SpiritScanner) await window.SpiritLoadScanner();
   const REF = await (await fetch("/tests/captures/reference.json")).json();
   bases = bases || Object.keys(REF);
   const rows = [], totals = {};

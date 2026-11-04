@@ -4,9 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spirit Tracker</title>
+  <meta name="description" content="Suis ta collection d'esprits Fortnite : possédés, maîtrisés, scanner de captures et de photos.">
+  <meta name="theme-color" content="#1b1c2b">
+  <link rel="icon" type="image/png" href="icons/favicon-64.png">
+  <link rel="apple-touch-icon" href="icons/app-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-title" content="Esprits">
   <!-- ?v=… : numéro de version à changer à chaque mise à jour, pour que les
        navigateurs téléchargent les nouveaux fichiers au lieu de garder l'ancien cache -->
-  <link rel="stylesheet" href="style.css?v=2026-11-04.11">
+  <link rel="stylesheet" href="style.css?v=2026-11-04.12">
   <!-- thème choisi, appliqué tout de suite (pas de flash de l'ancien thème) -->
   <script>
     // Thème personnalisé : couleurs et image choisies par la personne.
@@ -161,6 +167,7 @@
     <section class="backup">
       <h2>Sauvegarde</h2>
       <p>Ta progression est enregistrée dans ce navigateur. Exporte-la pour la garder ou la transférer sur un autre appareil.</p>
+      <p class="backup-tip">📱 Sur téléphone, ajoute le site à ton écran d'accueil (Safari : Partager → « Sur l'écran d'accueil » ; Chrome : ⋮ → « Ajouter à l'écran d'accueil »). Il s'ouvre alors comme une appli, et sur iPhone ta progression ne risque plus d'être effacée si tu ne viens pas pendant une semaine.</p>
       <div class="backup-actions">
         <button type="button" id="export" class="secondary">Exporter</button>
         <button type="button" id="import" class="secondary">Importer</button>
@@ -205,10 +212,10 @@
     </form>
   </dialog>
 
-  <script src="spirits-data.js?v=2026-11-04.11"></script>
-  <script src="spirits-fingerprints.js?v=2026-11-04.11" defer></script>
-  <script src="scanner.js?v=2026-11-04.11" defer></script>
-  <script src="app.js?v=2026-11-04.11"></script>
-  <script src="collection-image.js?v=2026-11-04.11"></script>
+  <script src="spirits-data.js?v=2026-11-04.12"></script>
+  <!-- scanner.js et spirits-fingerprints.js (1,7 Mo) sont chargés par app.js
+       seulement quand on s'apprête à scanner -->
+  <script src="app.js?v=2026-11-04.12"></script>
+  <script src="collection-image.js?v=2026-11-04.12"></script>
 </body>
 </html>

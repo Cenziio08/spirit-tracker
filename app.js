@@ -76,7 +76,18 @@ function loadJSON(key, fallback) {
   }
 }
 
+// Demande au navigateur de ne pas effacer la progression pour faire de la
+// place (Chrome/Android l'accorde souvent ; sur iPhone, ajouter le site à
+// l'écran d'accueil protège aussi les données).
+let persistAsked = false;
+function askPersistentStorage() {
+  if (persistAsked) return;
+  persistAsked = true;
+  navigator.storage?.persist?.().catch(() => {});
+}
+
 function saveProgress() {
+  askPersistentStorage();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
 }
 
@@ -622,6 +633,27 @@ function el(tag, className, text) {
   return node;
 }
 
+// Le scanner et ses empreintes (1,7 Mo) ne sont téléchargés que si on
+// s'apprête à scanner : la page s'ouvre plus vite, surtout en 4G.
+const ASSET_VERSION = (document.currentScript?.src.match(/\?v=([^&]+)/) || [])[1] || "";
+let scannerLoading = null;
+function loadScanner() {
+  if (window.SpiritScanner) return Promise.resolve();
+  if (scannerLoading) return scannerLoading;
+  const add = name => new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = `${name}?v=${ASSET_VERSION}`;
+    script.onload = resolve;
+    script.onerror = () => reject(new Error(`Impossible de charger ${name}`));
+    document.head.append(script);
+  });
+  scannerLoading = Promise.all([add("spirits-fingerprints.js"), add("scanner.js")])
+    .catch(error => { scannerLoading = null; throw error; });
+  return scannerLoading;
+}
+
+window.SpiritLoadScanner = loadScanner; // pour tests/photo-test.js
+
 async function runScan(files) {
   const images = [...files].filter(f => f.type.startsWith("image/"));
   if (!images.length) {
@@ -632,11 +664,6 @@ async function runScan(files) {
     scanQueue.push(...images);
     return;
   }
-  if (!window.SpiritScanner) {
-    toast("Le scanner est encore en cours de chargement, réessaie dans une seconde.");
-    return;
-  }
-
   scanning = true;
   const progressBox = $("scan-progress");
   const report = $("scan-report");
@@ -644,6 +671,11 @@ async function runScan(files) {
   report.hidden = true;
 
   try {
+    if (!window.SpiritScanner) {
+      $("scan-progress-bar").style.width = "0%";
+      $("scan-progress-label").textContent = "Chargement du scanner…";
+      await loadScanner();
+    }
     const result = await window.SpiritScanner.scan(images, (fraction, label) => {
       $("scan-progress-bar").style.width = Math.round(fraction * 100) + "%";
       $("scan-progress-label").textContent =
@@ -652,7 +684,9 @@ async function runScan(files) {
     applyScan(result);
   } catch (error) {
     console.error(error);
-    toast("Erreur pendant l'analyse des captures.");
+    toast(String(error.message).startsWith("Impossible de charger")
+      ? "Le scanner n'a pas pu se charger : vérifie ta connexion et réessaie."
+      : "Erreur pendant l'analyse des captures.");
   } finally {
     progressBox.hidden = true;
     scanning = false;
@@ -841,6 +875,9 @@ function showScanReport(result, rows, info) {
 }
 
 const dropzone = $("dropzone");
+// préchargement dès qu'on approche de la zone (souris, doigt, clavier)
+["pointerenter", "touchstart", "focus", "dragenter"].forEach(type =>
+  dropzone.addEventListener(type, () => loadScanner().catch(() => {}), { once: true, passive: true }));
 dropzone.addEventListener("click", () => $("scan-files").click());
 dropzone.addEventListener("keydown", event => {
   if (event.key === "Enter" || event.key === " ") {
