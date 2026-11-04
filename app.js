@@ -1028,125 +1028,45 @@ $("import-file").addEventListener("change", event => {
 });
 $("reset").addEventListener("click", resetProgress);
 
-/* ---------- Menus déroulants personnalisés ---------- */
+/* ---------- Filtres en boutons (façon fortnite.gg) ---------- */
 
-// Remplace l'affichage d'un <select> natif par un menu assorti au site.
-// Le <select> reste en place (caché) : il garde la valeur et déclenche "change".
-function enhanceSelect(select) {
-  const wrapper = el("div", "dropdown");
-  const toggle = el("button", "dropdown-toggle");
-  toggle.type = "button";
-  toggle.setAttribute("aria-haspopup", "listbox");
-  toggle.setAttribute("aria-expanded", "false");
-  toggle.setAttribute("aria-label", select.getAttribute("aria-label") || "");
-  const label = el("span", "dropdown-label");
-  const chevron = el("span", "dropdown-chevron");
-  chevron.setAttribute("aria-hidden", "true");
-  toggle.append(label, chevron);
-
-  const menu = el("ul", "dropdown-menu");
-  menu.setAttribute("role", "listbox");
-  menu.tabIndex = -1;
-  menu.hidden = true;
-
-  select.before(wrapper);
-  wrapper.append(toggle, menu, select);
-  select.classList.add("native-select");
-  select.tabIndex = -1;
-  select.setAttribute("aria-hidden", "true");
-
-  let activeIndex = -1;
-  const isSort = select.id === "sort";
-
-  function refresh() {
-    const current = select.options[select.selectedIndex];
-    label.textContent = current ? current.textContent : "";
-    // un filtre actif est mis en évidence (pas le tri, qui a toujours une valeur)
-    wrapper.classList.toggle("is-active", !isSort && select.value !== "");
-  }
-
-  function build() {
-    menu.replaceChildren();
-    [...select.options].forEach((option, index) => {
-      const item = el("li", "dropdown-option", option.textContent);
-      item.setAttribute("role", "option");
-      item.dataset.index = index;
-      if (index === select.selectedIndex) {
-        item.classList.add("selected");
-        item.setAttribute("aria-selected", "true");
-      }
-      item.addEventListener("click", () => choose(index));
-      item.addEventListener("mousemove", () => highlight(index));
-      menu.append(item);
+// Chaque rangée de boutons reflète un <select> caché, qui garde la valeur et
+// déclenche "change" (le reste du code ne lit que les <select>).
+function chipRow(select, container, { first = "Toutes", short = null, rarity = false } = {}) {
+  function render() {
+    const fragment = document.createDocumentFragment();
+    [...select.options].forEach((option, i) => {
+      const chip = el("button", "chip");
+      chip.type = "button";
+      chip.textContent = i === 0 && option.value === "" ? first : (short ? short(option.value, option.text) : option.text);
+      if (rarity && option.value) chip.classList.add("chip-rarity", `rarity-${option.value}`);
+      const active = option.value === select.value;
+      chip.classList.toggle("active", active);
+      chip.setAttribute("aria-pressed", String(active));
+      chip.addEventListener("click", () => {
+        if (select.value === option.value) return;
+        select.value = option.value;
+        select.dispatchEvent(new Event("change"));
+      });
+      fragment.append(chip);
     });
-  }
-
-  function highlight(index) {
-    activeIndex = index;
-    [...menu.children].forEach((item, i) =>
-      item.classList.toggle("active", i === index));
-    menu.children[index]?.scrollIntoView({ block: "nearest" });
-  }
-
-  function open() {
-    document.querySelectorAll(".dropdown.open").forEach(d => d !== wrapper && d.closeMenu());
-    build();
-    menu.hidden = false;
-    wrapper.classList.add("open");
-    toggle.setAttribute("aria-expanded", "true");
-    highlight(select.selectedIndex);
-  }
-
-  function close(focusToggle = false) {
-    menu.hidden = true;
-    wrapper.classList.remove("open");
-    toggle.setAttribute("aria-expanded", "false");
-    if (focusToggle) toggle.focus();
-  }
-  wrapper.closeMenu = close;
-
-  function choose(index) {
-    if (index !== select.selectedIndex) {
-      select.selectedIndex = index;
-      select.dispatchEvent(new Event("change"));
+    container.replaceChildren(fragment);
+    // rangée qui défile (téléphone) : le bouton choisi reste visible
+    const active = container.querySelector(".active");
+    if (active && container.scrollWidth > container.clientWidth) {
+      container.scrollLeft = active.offsetLeft - (container.clientWidth - active.offsetWidth) / 2;
     }
-    refresh();
-    close(true);
   }
-
-  toggle.addEventListener("click", () => (menu.hidden ? open() : close()));
-
-  toggle.addEventListener("keydown", event => {
-    const count = select.options.length;
-    if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key) && menu.hidden) {
-      event.preventDefault();
-      open();
-      return;
-    }
-    if (menu.hidden) return;
-    switch (event.key) {
-      case "ArrowDown": event.preventDefault(); highlight(Math.min(count - 1, activeIndex + 1)); break;
-      case "ArrowUp": event.preventDefault(); highlight(Math.max(0, activeIndex - 1)); break;
-      case "Home": event.preventDefault(); highlight(0); break;
-      case "End": event.preventDefault(); highlight(count - 1); break;
-      case "Enter":
-      case " ": event.preventDefault(); choose(activeIndex); break;
-      case "Escape": event.preventDefault(); close(true); break;
-      case "Tab": close(); break;
-    }
-  });
-
-  document.addEventListener("click", event => {
-    if (!wrapper.contains(event.target)) close();
-  });
-
-  // Les options sont recréées quand le catalogue change : on suit le mouvement
-  new MutationObserver(refresh).observe(select, { childList: true });
-  select.addEventListener("change", refresh);
-  refresh();
+  // options recréées quand le catalogue change ; valeur changée par le code
+  new MutationObserver(render).observe(select, { childList: true });
+  select.addEventListener("change", render);
+  render();
 }
 
-[rarityFilter, variantFilter, seasonFilter, sortElement].forEach(enhanceSelect);
+chipRow(seasonFilter, $("season-chips"), { first: "Toutes" });
+chipRow(rarityFilter, $("rarity-chips"), { first: "Toutes", rarity: true });
+chipRow(variantFilter, $("variant-chips"), { first: "Toutes" });
+chipRow(sortElement, $("sort-chips"));
 
 /* ---------- Thèmes ---------- */
 

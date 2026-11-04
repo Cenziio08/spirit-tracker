@@ -659,23 +659,39 @@ button.danger:hover {
 }
 
 .filters {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.filter-row {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  align-items: flex-start;
   gap: 12px;
-  margin-bottom: 10px;
+  min-width: 0;
+}
+
+.filter-label {
+  flex: 0 0 64px;
+  padding-top: 9px;
+  font-size: 13px;
+  color: var(--muted);
 }
 
 .chips {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  min-width: 0;
 }
 
 .chip {
   padding: 8px 14px;
-  border-radius: 99px;
+  border-radius: 10px;
   font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
   background: var(--panel);
   color: var(--muted);
 }
@@ -686,16 +702,74 @@ button.danger:hover {
   transform: none;
 }
 
-.chip.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--on-accent);
+.chip.active,
+.chip.active:hover:not(:disabled) {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
 }
 
-.selects {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* raretés : texte à la couleur de la rareté, fond coloré quand choisie */
+.chip-rarity {
+  color: var(--rarity);
+}
+
+.chip-rarity.active,
+.chip-rarity.active:hover:not(:disabled) {
+  background: var(--rarity);
+  border-color: var(--rarity);
+  color: #111;
+}
+
+/* petites couronnes (pleine = maîtrisés, contour = à maîtriser) */
+.chip-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.crown-icon {
+  width: 18px;
+  height: 13px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 62 42'%3E%3Cpath d='M7 31 L5 11 L19 22 L31 5 L43 22 L57 11 L55 31 Z M7 33 H55 V40 H7 Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 62 42'%3E%3Cpath d='M7 31 L5 11 L19 22 L31 5 L43 22 L57 11 L55 31 Z M7 33 H55 V40 H7 Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.crown-icon.outline {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 62 42'%3E%3Cpath fill='none' stroke='black' stroke-width='5' stroke-linejoin='round' d='M8 30 L6 12 L19 22 L31 6 L43 22 L56 12 L54 30 Z M8 34 H54 V39 H8 Z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 62 42'%3E%3Cpath fill='none' stroke='black' stroke-width='5' stroke-linejoin='round' d='M8 30 L6 12 L19 22 L31 6 L43 22 L56 12 L54 30 Z M8 34 H54 V39 H8 Z'/%3E%3C/svg%3E");
+}
+
+/* téléphone : une ligne par filtre, qui défile de côté */
+@media (max-width: 600px) {
+  .filter-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .filter-label {
+    flex: none;
+    padding-top: 0;
+  }
+
+  .chips {
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chip {
+    padding: 7px 12px;
+    font-size: 13px;
+  }
 }
 
 select {
@@ -704,154 +778,6 @@ select {
   background: var(--panel);
   color: var(--text);
   cursor: pointer;
-}
-
-/* ---------- Menus déroulants personnalisés ---------- */
-
-.native-select {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.dropdown {
-  position: relative;
-}
-
-.dropdown-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  min-width: 170px;
-  width: 100%;
-  padding: 9px 12px 9px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--panel);
-  color: var(--soft);
-  font-size: 14px;
-  text-align: left;
-}
-
-.dropdown-toggle:hover:not(:disabled) {
-  background: var(--surface);
-  border-color: var(--line-strong);
-  transform: none;
-}
-
-.dropdown.open .dropdown-toggle {
-  border-color: var(--accent-hover);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-hover) 20%, transparent);
-}
-
-/* Filtre actif : mis en évidence */
-.dropdown.is-active .dropdown-toggle {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  color: var(--text);
-}
-
-.dropdown-label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dropdown-chevron {
-  flex-shrink: 0;
-  width: 8px;
-  height: 8px;
-  margin-top: -4px;
-  border-right: 2px solid var(--muted);
-  border-bottom: 2px solid var(--muted);
-  transform: rotate(45deg);
-  transition: transform 0.2s ease, margin 0.2s ease;
-}
-
-.dropdown.open .dropdown-chevron {
-  margin-top: 4px;
-  transform: rotate(-135deg);
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 20;
-  min-width: 100%;
-  max-height: 290px;
-  margin: 0;
-  padding: 6px;
-  overflow-y: auto;
-  list-style: none;
-  background: var(--panel);
-  border: 1px solid var(--accent-line);
-  border-radius: 12px;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
-  animation: dropdown-in 0.14s ease-out;
-}
-
-.dropdown-option {
-  position: relative;
-  padding: 9px 12px 9px 30px;
-  border-radius: 8px;
-  color: var(--soft);
-  font-size: 14px;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.dropdown-option.active {
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
-  color: var(--text);
-}
-
-.dropdown-option.selected {
-  color: var(--text);
-  font-weight: bold;
-}
-
-.dropdown-option.selected::before {
-  content: "✓";
-  position: absolute;
-  left: 11px;
-  color: var(--accent-hover);
-}
-
-.dropdown-menu::-webkit-scrollbar {
-  width: 8px;
-}
-
-.dropdown-menu::-webkit-scrollbar-thumb {
-  background: var(--surface-hover);
-  border-radius: 8px;
-}
-
-@keyframes dropdown-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-#status {
-  color: var(--soft);
-}
-
-.empty {
-  padding: 40px;
-  text-align: center;
-  color: var(--muted);
-  border: 1px dashed var(--border);
-  border-radius: 14px;
 }
 
 /* ---------- Grille et cartes ---------- */
@@ -1186,15 +1112,6 @@ select {
     flex-direction: column;
   }
 
-  .selects .dropdown {
-    flex: 1 1 45%;
-    min-width: 0;
-  }
-
-  .dropdown-toggle {
-    min-width: 0;
-  }
-
   /* 3 cartes compactes par ligne, comme fortnite.gg sur téléphone */
   .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1296,8 +1213,7 @@ select {
     transition: none;
   }
 
-  .card.mastered .mastery-crown,
-  .dropdown-menu {
+  .card.mastered .mastery-crown {
     animation: none;
   }
 }

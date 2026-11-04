@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-title" content="Esprits">
   <!-- ?v=… : numéro de version à changer à chaque mise à jour, pour que les
        navigateurs téléchargent les nouveaux fichiers au lieu de garder l'ancien cache -->
-  <link rel="stylesheet" href="style.css?v=2026-11-04.16">
+  <link rel="stylesheet" href="style.css?v=2026-11-04.17">
   <!-- thème choisi, appliqué tout de suite (pas de flash de l'ancien thème) -->
   <script>
     // Thème personnalisé : couleurs et image choisies par la personne.
@@ -134,29 +134,43 @@
     </section>
 
     <section class="filters">
-      <div class="chips" id="status-filter" role="group" aria-label="Filtrer par statut">
-        <button type="button" class="chip active" data-status="all">Tous</button>
-        <button type="button" class="chip" data-status="missing">Manquants</button>
-        <button type="button" class="chip" data-status="owned">Possédés</button>
-        <button type="button" class="chip" data-status="unmastered">À maîtriser</button>
-        <button type="button" class="chip" data-status="mastered">Maîtrisés</button>
+      <div class="filter-row">
+        <span class="filter-label">Saison</span>
+        <div class="chips" id="season-chips" role="group" aria-label="Filtrer par saison"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Statut</span>
+        <div class="chips" id="status-filter" role="group" aria-label="Filtrer par statut">
+          <button type="button" class="chip active" data-status="all">Tous</button>
+          <button type="button" class="chip" data-status="owned">Possédés</button>
+          <button type="button" class="chip" data-status="missing">Manquants</button>
+          <button type="button" class="chip chip-icon" data-status="mastered" title="Maîtrisés" aria-label="Maîtrisés"><span class="crown-icon" aria-hidden="true"></span>Maîtrisés</button>
+          <button type="button" class="chip chip-icon" data-status="unmastered" title="Possédés mais pas maîtrisés" aria-label="À maîtriser"><span class="crown-icon outline" aria-hidden="true"></span>À maîtriser</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Rareté</span>
+        <div class="chips" id="rarity-chips" role="group" aria-label="Filtrer par rareté"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Variante</span>
+        <div class="chips" id="variant-chips" role="group" aria-label="Filtrer par variante"></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Tri</span>
+        <div class="chips" id="sort-chips" role="group" aria-label="Trier"></div>
       </div>
 
-      <div class="selects">
-        <select id="rarity-filter" aria-label="Filtrer par rareté">
-          <option value="">Toutes les raretés</option>
-        </select>
-        <select id="variant-filter" aria-label="Filtrer par variante">
-          <option value="">Toutes les variantes</option>
-        </select>
-        <select id="season-filter" aria-label="Filtrer par saison">
-          <option value="">Toutes les saisons</option>
-        </select>
-        <select id="sort" aria-label="Trier">
-          <option value="name">Tri : nom</option>
-          <option value="rarity">Tri : rareté</option>
-          <option value="season">Tri : saison</option>
-          <option value="status">Tri : à faire d'abord</option>
+      <!-- valeurs des filtres (cachées) : les boutons ci-dessus les modifient -->
+      <div hidden>
+        <select id="rarity-filter"><option value="">Toutes</option></select>
+        <select id="variant-filter"><option value="">Toutes</option></select>
+        <select id="season-filter"><option value="">Toutes</option></select>
+        <select id="sort">
+          <option value="name">Nom</option>
+          <option value="rarity">Rareté</option>
+          <option value="season">Saison</option>
+          <option value="status">À faire d'abord</option>
         </select>
       </div>
     </section>
@@ -222,12 +236,12 @@
     </form>
   </dialog>
 
-  <script src="spirits-data.js?v=2026-11-04.16"></script>
+  <script src="spirits-data.js?v=2026-11-04.17"></script>
   <!-- scanner.js et spirits-fingerprints.js (1,7 Mo) sont chargés par app.js
        seulement quand on s'apprête à scanner -->
-  <script src="app.js?v=2026-11-04.16"></script>
-  <script src="collection-image.js?v=2026-11-04.16"></script>
-  <script src="firebase-config.js?v=2026-11-04.16"></script>
-  <script type="module" src="sync.js?v=2026-11-04.16"></script>
+  <script src="app.js?v=2026-11-04.17"></script>
+  <script src="collection-image.js?v=2026-11-04.17"></script>
+  <script src="firebase-config.js?v=2026-11-04.17"></script>
+  <script type="module" src="sync.js?v=2026-11-04.17"></script>
 </body>
 </html>
