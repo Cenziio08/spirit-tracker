@@ -1,0 +1,12 @@
+# Réglages locaux de Claude Code (serveur de test)
+.claude/
+
+# Cache des icônes téléchargées par tools/build_fingerprints.py (~8 Mo, régénérable)
+tools/.icon-cache/
+
+# Fichiers temporaires
+_test_*/
+__pycache__/
+*.pyc
+Thumbs.db
+desktop.ini
