@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-title" content="Esprits">
   <!-- ?v=… : numéro de version à changer à chaque mise à jour, pour que les
        navigateurs téléchargent les nouveaux fichiers au lieu de garder l'ancien cache -->
-  <link rel="stylesheet" href="style.css?v=2026-11-04.15">
+  <link rel="stylesheet" href="style.css?v=2026-11-04.16">
   <!-- thème choisi, appliqué tout de suite (pas de flash de l'ancien thème) -->
   <script>
     // Thème personnalisé : couleurs et image choisies par la personne.
@@ -176,7 +176,7 @@
         <button type="button" id="sync-signin">Se connecter avec Google</button>
         <button type="button" id="sync-signout" class="secondary" hidden>Se déconnecter</button>
       </div>
-      <p>Ta progression est enregistrée dans ce navigateur. Exporte-la pour la garder ou la transférer sur un autre appareil.</p>
+      <p id="backup-text">Ta progression est enregistrée dans ce navigateur. Exporte-la pour la garder ou la transférer sur un autre appareil.</p>
       <p class="backup-tip">📱 Sur téléphone, ajoute le site à ton écran d'accueil (Safari : Partager → « Sur l'écran d'accueil » ; Chrome : ⋮ → « Ajouter à l'écran d'accueil »). Il s'ouvre alors comme une appli, et sur iPhone ta progression ne risque plus d'être effacée si tu ne viens pas pendant une semaine.</p>
       <div class="backup-actions">
         <button type="button" id="export" class="secondary">Exporter</button>
@@ -222,12 +222,12 @@
     </form>
   </dialog>
 
-  <script src="spirits-data.js?v=2026-11-04.15"></script>
+  <script src="spirits-data.js?v=2026-11-04.16"></script>
   <!-- scanner.js et spirits-fingerprints.js (1,7 Mo) sont chargés par app.js
        seulement quand on s'apprête à scanner -->
-  <script src="app.js?v=2026-11-04.15"></script>
-  <script src="collection-image.js?v=2026-11-04.15"></script>
-  <script src="firebase-config.js?v=2026-11-04.15"></script>
-  <script type="module" src="sync.js?v=2026-11-04.15"></script>
+  <script src="app.js?v=2026-11-04.16"></script>
+  <script src="collection-image.js?v=2026-11-04.16"></script>
+  <script src="firebase-config.js?v=2026-11-04.16"></script>
+  <script type="module" src="sync.js?v=2026-11-04.16"></script>
 </body>
 </html>

@@ -85,6 +85,12 @@ async function start() {
     signInButton.hidden = !!user;
     signOutButton.hidden = !user;
     who.textContent = user ? (user.email || user.displayName || "") : "";
+    const backupText = document.getElementById("backup-text");
+    if (backupText) {
+      backupText.textContent = user
+        ? "Ta progression est sauvegardée en ligne avec ton compte Google et suit tous tes appareils. L'export reste possible pour garder une copie en fichier."
+        : "Ta progression est enregistrée dans ce navigateur. Connecte-toi avec Google pour la retrouver sur tous tes appareils, ou exporte-la en fichier.";
+    }
     if (!user) {
       showStatus("Connecte-toi avec Google pour retrouver ta progression sur tous tes appareils.");
       return;
