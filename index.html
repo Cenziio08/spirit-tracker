@@ -6,7 +6,7 @@
   <title>Spirit Tracker</title>
   <!-- ?v=… : numéro de version à changer à chaque mise à jour, pour que les
        navigateurs téléchargent les nouveaux fichiers au lieu de garder l'ancien cache -->
-  <link rel="stylesheet" href="style.css?v=2026-11-04.5">
+  <link rel="stylesheet" href="style.css?v=2026-11-04.7">
 </head>
 <body>
   <header>
@@ -34,6 +34,8 @@
     </section>
 
     <section class="rarity-stats" id="rarity-stats"></section>
+
+    <button type="button" id="share-image" class="share-image">📥 Télécharger l'image de ma collection</button>
 
     <section class="scanner" id="scanner">
       <div class="dropzone" id="dropzone" tabindex="0" role="button"
@@ -116,9 +118,10 @@
 
   <div id="toast" class="toast" role="status" hidden></div>
 
-  <script src="spirits-data.js?v=2026-11-04.5"></script>
-  <script src="spirits-fingerprints.js?v=2026-11-04.5" defer></script>
-  <script src="scanner.js?v=2026-11-04.5" defer></script>
-  <script src="app.js?v=2026-11-04.5"></script>
+  <script src="spirits-data.js?v=2026-11-04.7"></script>
+  <script src="spirits-fingerprints.js?v=2026-11-04.7" defer></script>
+  <script src="scanner.js?v=2026-11-04.7" defer></script>
+  <script src="app.js?v=2026-11-04.7"></script>
+  <script src="collection-image.js?v=2026-11-04.7"></script>
 </body>
 </html>

@@ -42,7 +42,9 @@ const LOCAL_SPIRITS = (window.SPIRITS_DATA?.spirits || []).map(
     variant,
     season,
     unreleased: Boolean(unreleased),
-    url: /^https?:/.test(image)
+    // icône servie par le site (icons/), fortnite.gg en secours
+    url: `icons/${spriteId}-${variant}.webp`,
+    remoteUrl: /^https?:/.test(image)
       ? image
       : window.SPIRITS_DATA.imageBase + image
   })
@@ -332,11 +334,16 @@ function createCard(spirit) {
   img.alt = name;
   img.loading = "lazy";
   img.addEventListener("error", () => {
+    // icône locale absente : on essaie fortnite.gg, sinon un "?"
+    if (spirit.remoteUrl && img.src !== spirit.remoteUrl) {
+      img.src = spirit.remoteUrl;
+      return;
+    }
     img.replaceWith(Object.assign(document.createElement("div"), {
       className: "img-fallback",
       textContent: "?"
     }));
-  }, { once: true });
+  });
 
   const title = document.createElement("h3");
   title.textContent = name;
