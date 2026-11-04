@@ -4,6 +4,9 @@
 # Cache des icônes téléchargées par tools/build_fingerprints.py (~8 Mo, régénérable)
 tools/.icon-cache/
 
+# Captures du jeu servant à tester le scanner (montrent le pseudo : jamais publiées)
+tests/captures/
+
 # Fichiers temporaires
 _test_*/
 __pycache__/
