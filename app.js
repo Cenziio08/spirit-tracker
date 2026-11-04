@@ -1027,6 +1027,74 @@ function enhanceSelect(select) {
 
 [rarityFilter, variantFilter, seasonFilter, sortElement].forEach(enhanceSelect);
 
+/* ---------- Thèmes ---------- */
+
+const THEME_KEY = "spirit-tracker-theme";
+// [valeur, nom, couleurs de la pastille (fond, accent)]
+const THEMES = [
+  ["", "Violet (d'origine)", "#10111b", "#7651e8"],
+  ["sombre", "Sombre", "#0b0b0e", "#6b7280"],
+  ["clair", "Clair", "#eef0f6", "#6a43e0"],
+  ["fortnite", "Fortnite", "#0e2865", "#f8e548"],
+  ["hacker", "Système hacké", "#050a07", "#19c35a"],
+  ["rose", "Rose bonbon", "#2a1729", "#e0479e"]
+];
+
+function applyTheme(theme) {
+  if (theme) document.documentElement.dataset.theme = theme;
+  else delete document.documentElement.dataset.theme;
+  try {
+    if (theme) localStorage.setItem(THEME_KEY, theme);
+    else localStorage.removeItem(THEME_KEY);
+  } catch (e) { /* stockage bloqué : le thème ne sera pas retenu */ }
+  document.querySelectorAll(".theme-option").forEach(option => {
+    option.setAttribute("aria-checked", String(option.dataset.theme === theme));
+  });
+}
+
+(function setupThemePicker() {
+  const toggle = $("theme-toggle");
+  const menu = $("theme-menu");
+  if (!toggle || !menu) return;
+  const current = document.documentElement.dataset.theme || "";
+
+  THEMES.forEach(([value, label, bg, accent]) => {
+    const option = document.createElement("button");
+    option.type = "button";
+    option.className = "theme-option";
+    option.setAttribute("role", "menuitemradio");
+    option.setAttribute("aria-checked", String(value === current));
+    option.dataset.theme = value;
+    const swatch = document.createElement("span");
+    swatch.className = "theme-swatch";
+    swatch.style.background = `linear-gradient(135deg, ${bg} 50%, ${accent} 50%)`;
+    option.append(swatch, label);
+    option.addEventListener("click", () => {
+      applyTheme(value);
+      close();
+      toggle.focus();
+    });
+    menu.append(option);
+  });
+
+  function close() {
+    menu.hidden = true;
+    toggle.setAttribute("aria-expanded", "false");
+  }
+
+  toggle.addEventListener("click", () => {
+    menu.hidden = !menu.hidden;
+    toggle.setAttribute("aria-expanded", String(!menu.hidden));
+    if (!menu.hidden) menu.querySelector('[aria-checked="true"]')?.focus();
+  });
+  document.addEventListener("click", event => {
+    if (!event.target.closest(".theme-picker")) close();
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !menu.hidden) { close(); toggle.focus(); }
+  });
+})();
+
 /* ---------- Démarrage ---------- */
 
 setCatalog();

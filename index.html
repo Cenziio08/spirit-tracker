@@ -6,11 +6,22 @@
   <title>Spirit Tracker</title>
   <!-- ?v=… : numéro de version à changer à chaque mise à jour, pour que les
        navigateurs téléchargent les nouveaux fichiers au lieu de garder l'ancien cache -->
-  <link rel="stylesheet" href="style.css?v=2026-11-04.9">
+  <link rel="stylesheet" href="style.css?v=2026-11-04.10">
+  <!-- thème choisi, appliqué tout de suite (pas de flash de l'ancien thème) -->
+  <script>
+    try {
+      const theme = localStorage.getItem("spirit-tracker-theme");
+      if (theme) document.documentElement.dataset.theme = theme;
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <header>
     <h1>SPIRIT TRACKER</h1>
+    <div class="theme-picker">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-haspopup="true" aria-expanded="false" title="Changer de thème">🎨<span class="theme-toggle-label"> Thème</span></button>
+      <div id="theme-menu" class="theme-menu" role="menu" hidden></div>
+    </div>
   </header>
 
   <main>
@@ -118,10 +129,10 @@
 
   <div id="toast" class="toast" role="status" hidden></div>
 
-  <script src="spirits-data.js?v=2026-11-04.9"></script>
-  <script src="spirits-fingerprints.js?v=2026-11-04.9" defer></script>
-  <script src="scanner.js?v=2026-11-04.9" defer></script>
-  <script src="app.js?v=2026-11-04.9"></script>
-  <script src="collection-image.js?v=2026-11-04.9"></script>
+  <script src="spirits-data.js?v=2026-11-04.10"></script>
+  <script src="spirits-fingerprints.js?v=2026-11-04.10" defer></script>
+  <script src="scanner.js?v=2026-11-04.10" defer></script>
+  <script src="app.js?v=2026-11-04.10"></script>
+  <script src="collection-image.js?v=2026-11-04.10"></script>
 </body>
 </html>
