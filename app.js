@@ -656,6 +656,50 @@ function applyScan(result) {
   showScanReport(result, rows, { newOwned, newMastered, uncertain, before });
 }
 
+// Esprits devinés sans certitude (photos floues, de biais…) : on demande.
+function appendDoubtful(report, result) {
+  const items = (result.doubtful || [])
+    .map(d => ({ ...d, spirit: spiritByKey(d.key) }))
+    .filter(d => d.spirit && !getState(d.spirit).owned);
+  if (!items.length) return;
+
+  const box = el("div", "scan-doubtful");
+  box.append(
+    el("strong", null, `À vérifier (${items.length})`),
+    el("p", "scan-note",
+      "Le scanner n'est pas sûr de ceux-là (photo floue ou de biais). Confirme ceux qui sont justes, en précisant s'ils ont la couronne ; les autres seront ignorés.")
+  );
+  const grid = el("div", "scan-grid");
+  items.forEach(d => {
+    const tile = el("div", "scan-tile is-doubtful");
+    const img = el("img");
+    img.src = d.thumb;
+    img.alt = "";
+    const name = el("div", "scan-tile-name",
+      `${displayName(d.spirit)}${d.spirit.variant !== "base" ? " · " + variantLabel(d.spirit.variant) : ""} ?`);
+    // la couronne est elle aussi incertaine sur ces images : on laisse choisir
+    const buttons = el("div", "scan-confirm-row");
+    const confirm = mastered => {
+      const state = getState(d.spirit);
+      progress[d.key] = { owned: true, mastered: state.mastered || mastered };
+      saveProgress();
+      renderSpirits();
+      tile.classList.add("is-confirmed");
+      buttons.replaceWith(el("div", "scan-tile-badge", mastered ? "👑 Ajouté" : "✓ Ajouté"));
+    };
+    const owned = el("button", "scan-confirm secondary", "✓ Je l'ai");
+    const crowned = el("button", "scan-confirm" + (d.crowned ? "" : " secondary"), "👑 Maîtrisé");
+    [owned, crowned].forEach(b => { b.type = "button"; });
+    owned.addEventListener("click", () => confirm(false));
+    crowned.addEventListener("click", () => confirm(true));
+    buttons.append(owned, crowned);
+    tile.append(img, name, buttons);
+    grid.append(tile);
+  });
+  box.append(grid);
+  report.append(box);
+}
+
 function showScanReport(result, rows, info) {
   const report = $("scan-report");
   report.replaceChildren();
@@ -666,18 +710,19 @@ function showScanReport(result, rows, info) {
 
   if (!rows.length) {
     summary.append(
-      el("strong", null, "Aucun esprit reconnu."),
+      el("strong", null, result.doubtful?.length ? "Aucun esprit reconnu avec certitude." : "Aucun esprit reconnu."),
       el("span", null,
-        " Vérifie que la capture montre bien la grille des esprits (onglet Esprits, en plein écran ou recadrée).")
+        " Vérifie que l'image montre bien la grille des esprits (onglet Esprits). Pour une photo : bien en face, nette, sans reflet.")
     );
     head.append(summary);
     report.append(head);
+    appendDoubtful(report, result);
     return;
   }
 
   summary.append(
     el("strong", null,
-      `${rows.length} esprit(s) reconnu(s) sur ${result.files} capture(s)`),
+      `${rows.length} esprit(s) reconnu(s) sur ${result.files} image(s)`),
     el("span", null,
       ` — +${info.newOwned} possédé(s), +${info.newMastered} maîtrisé(s) ajouté(s) à ta collection.`)
   );
@@ -699,6 +744,8 @@ function showScanReport(result, rows, info) {
 
   head.append(summary, undo, close);
   report.append(head);
+
+  appendDoubtful(report, result);
 
   if (info.uncertain) {
     report.append(el("p", "scan-note",

@@ -184,6 +184,45 @@ main {
   color: var(--muted);
 }
 
+/* Texte adapté : souris/clavier ou écran tactile */
+.only-touch {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .only-desktop {
+    display: none;
+  }
+
+  .only-touch {
+    display: inline;
+  }
+}
+
+.photo-tips {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: #d6d3ea;
+  font-size: 14px;
+}
+
+.photo-tips summary {
+  cursor: pointer;
+  color: #c9c2ff;
+}
+
+.photo-tips ul {
+  margin: 10px 0 2px;
+  padding-left: 20px;
+}
+
+.photo-tips li {
+  margin: 4px 0;
+}
+
 kbd {
   padding: 1px 6px;
   border-radius: 5px;
@@ -301,6 +340,40 @@ kbd {
 
 .scan-tile-badge {
   color: var(--muted);
+}
+
+.scan-doubtful {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px dashed #b38b3c;
+  border-radius: 10px;
+  background: rgba(255, 179, 107, 0.06);
+}
+
+.scan-doubtful > strong {
+  color: #ffcf8a;
+}
+
+.scan-tile.is-doubtful {
+  border-color: #6b5a3a;
+}
+
+.scan-tile.is-confirmed {
+  border-color: var(--owned);
+}
+
+.scan-confirm-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+}
+
+.scan-confirm {
+  margin-top: 2px;
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 7px;
 }
 
 .scan-new {

@@ -6,7 +6,7 @@
   <title>Spirit Tracker</title>
   <!-- ?v=… : numéro de version à changer à chaque mise à jour, pour que les
        navigateurs téléchargent les nouveaux fichiers au lieu de garder l'ancien cache -->
-  <link rel="stylesheet" href="style.css?v=2026-11-04.2">
+  <link rel="stylesheet" href="style.css?v=2026-11-04.3">
 </head>
 <body>
   <header>
@@ -40,10 +40,22 @@
         aria-label="Ajouter des captures d'écran de ta collection">
         <div class="dropzone-icon" aria-hidden="true">📸</div>
         <strong>Scanne ta collection depuis le jeu</strong>
-        <span>Glisse tes captures d'écran ici, clique pour les choisir, ou fais <kbd>Ctrl</kbd>+<kbd>V</kbd> après une capture.</span>
-        <small>Dans le jeu : Esprits → fais défiler la liste et prends une capture à chaque écran. L'ordre n'a pas d'importance.</small>
+        <span class="only-desktop">Glisse tes captures d'écran ou photos ici, clique pour les choisir, ou fais <kbd>Ctrl</kbd>+<kbd>V</kbd> après une capture.</span>
+        <span class="only-touch">Touche ici pour prendre une photo de l'écran ou choisir des images.</span>
+        <small>Dans le jeu : Esprits → fais défiler la liste, une image par écran. L'ordre n'a pas d'importance.</small>
         <input type="file" id="scan-files" accept="image/*" multiple hidden>
       </div>
+
+      <details class="photo-tips">
+        <summary>📱 Conseils pour les photos prises au téléphone</summary>
+        <ul>
+          <li><strong>Bien en face</strong> de l'écran, téléphone droit (pas en biais).</li>
+          <li><strong>La grille des esprits en grand</strong> : rapproche-toi pour qu'elle remplisse la photo.</li>
+          <li><strong>Pas de reflet</strong> sur l'écran (éteins la lumière derrière toi si besoin).</li>
+          <li><strong>Photo nette</strong> : appuie sur l'écran du téléphone pour faire la mise au point.</li>
+          <li>Une capture d'écran reste toujours plus fiable qu'une photo, si c'est possible.</li>
+        </ul>
+      </details>
 
       <div class="scan-progress" id="scan-progress" hidden>
         <div class="scan-progress-label" id="scan-progress-label">Analyse…</div>
@@ -104,9 +116,9 @@
 
   <div id="toast" class="toast" role="status" hidden></div>
 
-  <script src="spirits-data.js?v=2026-11-04.2"></script>
-  <script src="spirits-fingerprints.js?v=2026-11-04.2" defer></script>
-  <script src="scanner.js?v=2026-11-04.2" defer></script>
-  <script src="app.js?v=2026-11-04.2"></script>
+  <script src="spirits-data.js?v=2026-11-04.3"></script>
+  <script src="spirits-fingerprints.js?v=2026-11-04.3" defer></script>
+  <script src="scanner.js?v=2026-11-04.3" defer></script>
+  <script src="app.js?v=2026-11-04.3"></script>
 </body>
 </html>
