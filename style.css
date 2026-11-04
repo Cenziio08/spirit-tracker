@@ -963,8 +963,92 @@ select {
     min-width: 0;
   }
 
+  /* 3 cartes compactes par ligne, comme fortnite.gg sur téléphone */
   .grid {
-    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .card {
+    padding: 8px 7px 9px;
+    border-radius: 10px;
+  }
+
+  .card.owned {
+    border-width: 2px;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+
+  .card img,
+  .img-fallback {
+    height: 82px;
+  }
+
+  .img-fallback {
+    font-size: 32px;
+  }
+
+  .mastery-crown {
+    width: 24px;
+    height: 16px;
+  }
+
+  .card h3 {
+    margin: 6px 0 5px;
+    font-size: 13px;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tags {
+    gap: 3px;
+  }
+
+  .tag {
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-size: 10px;
+  }
+
+  /* la saison prend trop de place : déjà filtrable dans le menu */
+  .tag.season-tag {
+    display: none;
+  }
+
+  .checks {
+    padding-top: 4px;
+  }
+
+  .card label {
+    gap: 5px;
+    margin-top: 6px;
+    font-size: 12px;
+  }
+
+  .card label:hover {
+    transform: none;
+  }
+
+  .card input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    border-radius: 5px;
+  }
+
+  .card input[type="checkbox"]::before {
+    font-size: 13px;
+  }
+}
+
+/* très petits écrans : les cases restent lisibles */
+@media (max-width: 350px) {
+  .card label {
+    font-size: 11px;
   }
 }
 

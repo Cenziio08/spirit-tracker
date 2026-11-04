@@ -363,7 +363,7 @@ function createCard(spirit) {
 
   if (spirit.season) {
     const season = document.createElement("span");
-    season.className = "tag";
+    season.className = "tag season-tag";
     season.textContent = seasonLabel(spirit.season);
     tags.append(season);
   }
