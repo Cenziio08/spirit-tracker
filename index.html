@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spirit Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>SPIRIT TRACKER</h1>
+  </header>
+
+  <main>
+    <section class="stats">
+      <div class="stat">
+        <span>Esprits possédés</span>
+        <strong><span id="owned">0</span><small> / <span class="total">0</span></small></strong>
+      </div>
+      <div class="stat">
+        <span>Maîtrisés</span>
+        <strong><span id="mastered">0</span><small> / <span class="total">0</span></small></strong>
+      </div>
+      <div class="stat">
+        <span>Progression</span>
+        <strong id="progress">0%</strong>
+        <div class="progress-bar" aria-hidden="true">
+          <div class="progress-owned" id="bar-owned"></div>
+          <div class="progress-mastered" id="bar-mastered"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rarity-stats" id="rarity-stats"></section>
+
+    <section class="scanner" id="scanner">
+      <div class="dropzone" id="dropzone" tabindex="0" role="button"
+        aria-label="Ajouter des captures d'écran de ta collection">
+        <div class="dropzone-icon" aria-hidden="true">📸</div>
+        <strong>Scanne ta collection depuis le jeu</strong>
+        <span>Glisse tes captures d'écran ici, clique pour les choisir, ou fais <kbd>Ctrl</kbd>+<kbd>V</kbd> après une capture.</span>
+        <small>Dans le jeu : Esprits → fais défiler la liste et prends une capture à chaque écran. L'ordre n'a pas d'importance.</small>
+        <input type="file" id="scan-files" accept="image/*" multiple hidden>
+      </div>
+
+      <div class="scan-progress" id="scan-progress" hidden>
+        <div class="scan-progress-label" id="scan-progress-label">Analyse…</div>
+        <div class="progress-bar"><div class="progress-scan" id="scan-progress-bar"></div></div>
+      </div>
+
+      <div class="scan-report" id="scan-report" hidden></div>
+    </section>
+
+    <section class="toolbar">
+      <input id="search" type="search"
+        placeholder="Rechercher un esprit..." aria-label="Rechercher un esprit">
+      <button id="refresh" type="button">Actualiser la liste</button>
+    </section>
+
+    <section class="filters">
+      <div class="chips" id="status-filter" role="group" aria-label="Filtrer par statut">
+        <button type="button" class="chip active" data-status="all">Tous</button>
+        <button type="button" class="chip" data-status="missing">Manquants</button>
+        <button type="button" class="chip" data-status="owned">Possédés</button>
+        <button type="button" class="chip" data-status="unmastered">À maîtriser</button>
+        <button type="button" class="chip" data-status="mastered">Maîtrisés</button>
+      </div>
+
+      <div class="selects">
+        <select id="rarity-filter" aria-label="Filtrer par rareté">
+          <option value="">Toutes les raretés</option>
+        </select>
+        <select id="variant-filter" aria-label="Filtrer par variante">
+          <option value="">Toutes les variantes</option>
+        </select>
+        <select id="season-filter" aria-label="Filtrer par saison">
+          <option value="">Toutes les saisons</option>
+        </select>
+        <select id="sort" aria-label="Trier">
+          <option value="name">Tri : nom</option>
+          <option value="rarity">Tri : rareté</option>
+          <option value="season">Tri : saison</option>
+          <option value="status">Tri : à faire d'abord</option>
+        </select>
+      </div>
+    </section>
+
+    <p id="status" aria-live="polite">Chargement du catalogue...</p>
+    <section id="spirits" class="grid"></section>
+    <p id="empty" class="empty" hidden>Aucun esprit ne correspond à ta recherche.</p>
+
+    <section class="backup">
+      <h2>Sauvegarde</h2>
+      <p>Ta progression est enregistrée dans ce navigateur. Exporte-la pour la garder ou la transférer sur un autre appareil.</p>
+      <div class="backup-actions">
+        <button type="button" id="export" class="secondary">Exporter</button>
+        <button type="button" id="import" class="secondary">Importer</button>
+        <button type="button" id="reset" class="danger">Tout réinitialiser</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script src="spirits-data.js"></script>
+  <script src="spirits-fingerprints.js" defer></script>
+  <script src="scanner.js" defer></script>
+  <script src="app.js"></script>
+</body>
+</html>
