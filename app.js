@@ -201,6 +201,77 @@ function updateStats() {
       pill.textContent = `${rarityLabel(rarity)} ${done}/${count}`;
       container.append(pill);
     });
+
+  updateSeasonStats();
+}
+
+// Progression par saison (la plus récente d'abord). Les esprits pas encore
+// sortis ne comptent pas, sauf s'ils sont déjà possédés. Un clic sur une
+// saison l'affiche dans la liste (re-clic : toutes les saisons).
+function updateSeasonStats() {
+  const container = $("season-stats");
+  if (!container) return;
+  const bySeason = new Map();
+  spirits.forEach(spirit => {
+    if (!spirit.season) return;
+    const state = getState(spirit);
+    if (spirit.unreleased && !state.owned) return;
+    const s = bySeason.get(spirit.season) || { total: 0, owned: 0, mastered: 0 };
+    s.total++;
+    if (state.owned) s.owned++;
+    if (state.mastered) s.mastered++;
+    bySeason.set(spirit.season, s);
+  });
+
+  container.replaceChildren(...[...bySeason.keys()]
+    .sort((a, b) => seasonValue(b) - seasonValue(a))
+    .map(season => {
+      const { total, owned, mastered } = bySeason.get(season);
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "season-stat";
+      card.classList.toggle("active", seasonFilter.value === season);
+      card.classList.toggle("complete", mastered === total);
+      card.setAttribute("aria-pressed", String(seasonFilter.value === season));
+      card.title = seasonFilter.value === season
+        ? "Afficher toutes les saisons"
+        : `Afficher seulement ${seasonLabel(season)}`;
+
+      const head = document.createElement("span");
+      head.className = "season-stat-head";
+      const name = document.createElement("strong");
+      name.textContent = seasonLabel(season);
+      const percent = document.createElement("span");
+      percent.textContent = (mastered === total ? "✓ " : "") + Math.round(mastered / total * 100) + " %";
+      head.append(name, percent);
+
+      const bar = document.createElement("span");
+      bar.className = "season-stat-bar";
+      const barOwned = document.createElement("span");
+      barOwned.className = "season-bar-owned";
+      barOwned.style.width = (owned / total * 100) + "%";
+      const barMastered = document.createElement("span");
+      barMastered.className = "season-bar-mastered";
+      barMastered.style.width = (mastered / total * 100) + "%";
+      bar.append(barOwned, barMastered);
+
+      const counts = document.createElement("span");
+      counts.className = "season-stat-counts";
+      const o = document.createElement("span");
+      o.className = "count-owned";
+      o.textContent = `${owned}/${total} possédés`;
+      const m = document.createElement("span");
+      m.className = "count-mastered";
+      m.textContent = `👑 ${mastered}/${total}`;
+      counts.append(o, m);
+
+      card.append(head, bar, counts);
+      card.addEventListener("click", () => {
+        seasonFilter.value = seasonFilter.value === season ? "" : season;
+        seasonFilter.dispatchEvent(new Event("change"));
+      });
+      return card;
+    }));
 }
 
 /* ---------- Filtres ---------- */

@@ -1508,3 +1508,101 @@ select {
   font-size: 14px;
   color: var(--muted);
 }
+
+/* ---------- Progression par saison ---------- */
+
+.season-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.season-stats:empty {
+  display: none;
+}
+
+.season-stat {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.season-stat:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+.season-stat.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.season-stat.complete {
+  border-color: var(--gold);
+}
+
+.season-stat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.season-stat-head span {
+  color: var(--muted);
+  font-weight: bold;
+}
+
+.season-stat.complete .season-stat-head span {
+  color: var(--gold);
+}
+
+.season-stat-bar {
+  position: relative;
+  height: 7px;
+  border-radius: 99px;
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.season-stat-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.season-bar-owned {
+  background: color-mix(in srgb, var(--owned) 50%, transparent);
+}
+
+.season-bar-mastered {
+  background: linear-gradient(90deg, #ffb800, var(--gold));
+}
+
+.season-stat-counts {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.count-owned {
+  color: var(--owned);
+}
+
+.count-mastered {
+  color: var(--gold);
+}
+
+@media (max-width: 600px) {
+  .season-stats {
+    grid-template-columns: 1fr;
+  }
+}
