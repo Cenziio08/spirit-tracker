@@ -212,7 +212,7 @@
       "share.empty": "No sprites to put in the image for this season.",
       "share.done": "Image downloaded!",
       "share.fileProtocol": "Not possible here: open the online site to download the image.",
-      "share.error": "Couldn't create the image, please try again.",
+      "share.error": "Couldn't create the image. Please try again.",
       "share.title": "My Sprites collection",
       "image.allSeasons": "All seasons",
       "image.owned": "OWNED",
@@ -260,7 +260,7 @@
       "scan.added1": "✓ Added",
       "scan.addedCrown": "👑 Added",
 
-      "search.placeholder": "Search for a sprite...",
+      "search.placeholder": "Search for a sprite…",
       "filter.season": "Season",
       "filter.status": "Status",
       "filter.rarity": "Rarity",
@@ -276,9 +276,9 @@
       "sort.name": "Name",
       "sort.rarity": "Rarity",
       "sort.season": "Season",
-      "sort.status": "To do first",
+      "sort.status": "Unfinished first",
 
-      "list.loading": "Loading the catalogue...",
+      "list.loading": "Loading the catalogue…",
       "list.count": v => `Showing ${v.n} of ${v.total} sprites.`,
       "list.empty": "No sprites match your search.",
       "card.owned": "Owned",
@@ -328,7 +328,7 @@
       "sync.loading": "Loading…",
       "sync.signin": "Sign in with Google",
       "sync.signout": "Sign out",
-      "sync.startError": "Sync couldn't start (connection?).",
+      "sync.startError": "Sync couldn't start (check your connection).",
       "sync.loginError": v => `Sign-in failed: ${v.code}`,
       "sync.prompt": "Sign in with Google to get your progress on all your devices.",
       "sync.ok": v => `✓ Synced (${v.time})`,
@@ -349,7 +349,7 @@
       "custom.glass": "See-through cards",
       "custom.reset": "Back to purple",
       "custom.done": "Done",
-      "custom.badImage": "Couldn't use this image, try another one."
+      "custom.badImage": "Couldn't use this image. Please try another one."
     }
   };
 
