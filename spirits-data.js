@@ -1,9 +1,9 @@
-// Liste complète des esprits (source : fortnite.gg/sprites, relevée le 2026-11-09).
+// Liste complète des esprits (source : fortnite.gg/sprites, relevée le 2026-11-12).
 // Format de chaque ligne : [spriteId, parent, nom affiché, rareté, variante, saison, image, pasEncoreSorti?]
 // Les identifiants sont les mêmes que ceux du catalogue en ligne,
 // donc la progression déjà enregistrée reste compatible.
 window.SPIRITS_DATA = {
-  updated: "2026-11-09",
+  updated: "2026-11-12",
   imageBase: "https://fortnite.gg/img/x/sprites/icons/",
   spirits: [
     // ----- Chapitre 7 – Mini-saison -----
@@ -33,18 +33,43 @@ window.SPIRITS_DATA = {
     ["308","RookGecko","Lil' Uzi Vert Jr.","legendary","base","c7ms","T_Icon_BR_Creature_Sprite_RookGecko_L.webp"],
     ["310","RookGecko","Lil' Uzi Vert Jr.","special","jeweled","c7ms","T_Icon_BR_Creature_Sprite_RookGecko_Jeweled_L.webp"],
 
-    // Pas encore sortis (masqués par défaut sur fortnite.gg) — 8e champ : true
+    // Variantes Cursed (sorties entre le 7 et le 12 novembre 2026)
     ["282","PeelyBones","Halfpeel'd","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_PeelyBones_Cursed_L.webp"],
     ["284","Parrot","Re-Pete","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_Parrot_Cursed_L.webp"],
     ["287","BarrelOfFish","Barry O'Fish","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_BarrelOfFish_Cursed_L.webp"],
     ["296","Compass","Wayfinder","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_Compass_Cursed_L.webp"],
     ["290","TreasureChest","Chester","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_TreasureChest_Cursed_L.webp"],
-    ["300","UnbotheredFish","Kelper","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_UnbotheredFish_Cursed_L.webp",true],
+    ["300","UnbotheredFish","Kelper","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_UnbotheredFish_Cursed_L.webp"],
     ["294","TreasureMap","Exmarks","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_TreasureMap_Cursed_L.webp"],
     ["303","Squibbly","Lil' Squibbly","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_SquibblySprite_Cursed_L.webp"],
     ["307","PlaymakerBrewery","Lil' Flacko","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_PlaymakerBrewery_Cursed_L.webp"],
     ["309","RookGecko","Lil' Uzi Vert Jr.","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_RookGecko_Cursed_L.webp"],
     ["312","CoinPile","Plundarrgh","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_CoinPile_Cursed_L.webp"],
+    // Pas encore sortis (masqués sur fortnite.gg le 2026-11-12) — 8e champ : true
+    ["315","PeelyBones","Halfpeel'd","special","gold","c7ms","T_Icon_BR_Creature_Sprite_PeelyBones_LiquidGold_L.webp",true],
+    ["316","Parrot","Re-Pete","special","gold","c7ms","T_Icon_BR_Creature_Sprite_Parrot_LiquidGold_L.webp",true],
+    ["317","BarrelOfFish","Barry O'Fish","special","gold","c7ms","T_Icon_BR_Creature_Sprite_BarrelOfFish_LiquidGold_L.webp",true],
+    ["320","Compass","Wayfinder","special","gold","c7ms","T_Icon_BR_Creature_Sprite_Compass_LiquidGold_L.webp",true],
+    ["318","TreasureChest","Chester","special","gold","c7ms","T_Icon_BR_Creature_Sprite_TreasureChest_LiquidGold_L.webp",true],
+    ["325","UnbotheredFish","Kelper","special","gold","c7ms","T_Icon_BR_Creature_Sprite_UnbotheredFish_LiquidGold_L.webp",true],
+    ["319","TreasureMap","Exmarks","special","gold","c7ms","T_Icon_BR_Creature_Sprite_TreasureMap_LiquidGold_L.webp",true],
+    ["337","Squibbly","Lil' Squibbly","special","gold","c7ms","T_Icon_BR_Creature_Sprite_Squibbly_LiquidGold_ui_v1_1_Alpha_L.webp",true],
+    ["330","PlaymakerBrewery","Lil' Flacko","special","gold","c7ms","T_Icon_BR_Creature_Sprite_PlaymakerBrewery_LiquidGold_L.webp",true],
+    ["331","RookGecko","Lil' Uzi Vert Jr.","special","gold","c7ms","T_Icon_BR_Creature_Sprite_RookGecko_LiquidGold_L.webp",true],
+    ["336","CoinPile","Plundarrgh","special","gold","c7ms","T_Icon_BR_Creature_Sprite_CoinPile_LiquidGold_L.webp",true],
+    ["321","PirateCalamari","Squiplash","epic","base","c7ms","T_Icon_BR_Creature_Sprite_PirateCalamari_L.webp",true],
+    ["323","PirateCalamari","Squiplash","special","jeweled","c7ms","T_Icon_BR_Creature_Sprite_PirateCalamari_Jeweled_L.webp",true],
+    ["324","PirateCalamari","Squiplash","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_PirateCalamari_Cursed_L.webp",true],
+    ["322","PirateCalamari","Squiplash","special","gold","c7ms","T_Icon_BR_Creature_Sprite_PirateCalamari_LiquidGold_L.webp",true],
+    ["326","WhiteTiger","Sir Oscar the Second","legendary","base","c7ms","T_Icon_BR_Creature_Sprite_WhiteTiger_L.webp",true],
+    ["328","WhiteTiger","Sir Oscar the Second","special","jeweled","c7ms","T_Icon_BR_Creature_Sprite_WhiteTiger_Jeweled_L.webp",true],
+    ["329","WhiteTiger","Sir Oscar the Second","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_WhiteTiger_Cursed_L.webp",true],
+    ["327","WhiteTiger","Sir Oscar the Second","special","gold","c7ms","T_Icon_BR_Creature_Sprite_WhiteTiger_LiquidGold_L.webp",true],
+    ["332","DaffodilChurn","Mini Miku","mythic","base","c7ms","T_Icon_BR_Creature_Sprite_LushlyZest_ui_v2_1_Alpha_L.webp",true],
+    ["335","DaffodilChurn","Mini Miku","special","jeweled","c7ms","T_Icon_BR_Creature_Sprite_LushlyZest_Jeweled_ui_v1_1_Alpha_L.webp",true],
+    ["334","DaffodilChurn","Mini Miku","special","cursed","c7ms","T_Icon_BR_Creature_Sprite_LushlyZest_Cursed_ui_v1_1_Alpha_L.webp",true],
+    ["333","DaffodilChurn","Mini Miku","special","gold","c7ms","T_Icon_BR_Creature_Sprite_LushlyZest_LiquidGold_ui_v1_1_Alpha_L.webp",true],
+    ["338","YortMelee","Zee","mythic","base","c7ms","T_Icon_BR_Creature_Sprite_ZeroPointPiece_ui_v3_1_Alpha_L.webp",true],
 
     // ----- Chapitre 7 – Saison 4 -----
     ["182","Jonesy","Jonesy","rare","base","c7s4","T_Icon_BR_Creature_Sprite_Jonesy_L.webp"],
