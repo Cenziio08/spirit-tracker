@@ -12,7 +12,8 @@
   <meta name="apple-mobile-web-app-title" content="Esprits">
   <!-- ?v=… : numéro de version à changer à chaque mise à jour, pour que les
        navigateurs téléchargent les nouveaux fichiers au lieu de garder l'ancien cache -->
-  <link rel="stylesheet" href="style.css?v=2026-11-12.1">
+  <link rel="stylesheet" href="style.css?v=2026-11-12.4">
+  <script src="i18n.js?v=2026-11-12.4"></script>
   <!-- thème choisi, appliqué tout de suite (pas de flash de l'ancien thème) -->
   <script>
     // Thème personnalisé : couleurs et image choisies par la personne.
@@ -67,24 +68,30 @@
 <body>
   <header>
     <h1>SPIRIT TRACKER</h1>
-    <div class="theme-picker">
-      <button id="theme-toggle" class="theme-toggle" type="button" aria-haspopup="true" aria-expanded="false" title="Changer de thème">🎨<span class="theme-toggle-label"> Thème</span></button>
-      <div id="theme-menu" class="theme-menu" role="menu" hidden></div>
+    <div class="header-tools">
+      <div class="lang-switch" role="group" data-i18n-attr="aria-label:lang.switch">
+        <button type="button" data-lang="fr" lang="fr" title="Français">FR</button>
+        <button type="button" data-lang="en" lang="en" title="English">EN</button>
+      </div>
+      <div class="theme-picker">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-haspopup="true" aria-expanded="false" data-i18n-attr="title:theme.title">🎨<span class="theme-toggle-label"> <span data-i18n="theme.button">Thème</span></span></button>
+        <div id="theme-menu" class="theme-menu" role="menu" hidden></div>
+      </div>
     </div>
   </header>
 
   <main>
     <section class="stats">
       <div class="stat">
-        <span>Esprits possédés</span>
+        <span data-i18n="stats.owned">Esprits possédés</span>
         <strong><span id="owned">0</span><small> / <span class="total">0</span></small></strong>
       </div>
       <div class="stat">
-        <span>Maîtrisés</span>
+        <span data-i18n="stats.mastered">Maîtrisés</span>
         <strong><span id="mastered">0</span><small> / <span class="total">0</span></small></strong>
       </div>
       <div class="stat">
-        <span>Progression</span>
+        <span data-i18n="stats.progress">Progression</span>
         <strong id="progress">0%</strong>
         <div class="progress-bar" aria-hidden="true">
           <div class="progress-owned" id="bar-owned"></div>
@@ -94,34 +101,34 @@
     </section>
 
     <section class="rarity-stats" id="rarity-stats"></section>
-    <section class="season-stats" id="season-stats" aria-label="Progression par saison"></section>
+    <section class="season-stats" id="season-stats" data-i18n-attr="aria-label:stats.bySeason"></section>
 
-    <button type="button" id="share-image" class="share-image">📥 Télécharger l'image de ma collection</button>
+    <button type="button" id="share-image" class="share-image" data-i18n="share.button">📥 Télécharger l'image de ma collection</button>
 
     <section class="scanner" id="scanner">
       <div class="dropzone" id="dropzone" tabindex="0" role="button"
-        aria-label="Ajouter des captures d'écran de ta collection">
+        data-i18n-attr="aria-label:scan.aria">
         <div class="dropzone-icon" aria-hidden="true">📸</div>
-        <strong>Scanne ta collection depuis le jeu</strong>
-        <span class="only-desktop">Glisse tes captures d'écran ou photos ici, clique pour les choisir, ou fais <kbd>Ctrl</kbd>+<kbd>V</kbd> après une capture.</span>
-        <span class="only-touch">Touche ici pour prendre une photo de l'écran ou choisir des images.</span>
-        <small>Dans le jeu : Esprits → fais défiler la liste, une image par écran. L'ordre n'a pas d'importance.</small>
+        <strong data-i18n="scan.title">Scanne ta collection depuis le jeu</strong>
+        <span class="only-desktop" data-i18n-html="scan.desktop">Glisse tes captures d'écran ou photos ici, clique pour les choisir, ou fais <kbd>Ctrl</kbd>+<kbd>V</kbd> après une capture.</span>
+        <span class="only-touch" data-i18n="scan.touch">Touche ici pour prendre une photo de l'écran ou choisir des images.</span>
+        <small data-i18n="scan.hint">Dans le jeu : Esprits → fais défiler la liste, une image par écran. L'ordre n'a pas d'importance.</small>
         <input type="file" id="scan-files" accept="image/*" multiple hidden>
       </div>
 
       <details class="photo-tips">
-        <summary>📱 Conseils pour les photos prises au téléphone</summary>
+        <summary data-i18n="tips.summary">📱 Conseils pour les photos prises au téléphone</summary>
         <ul>
-          <li><strong>Bien en face</strong> de l'écran, téléphone droit (pas en biais).</li>
-          <li><strong>La grille des esprits en grand</strong> : rapproche-toi pour qu'elle remplisse la photo.</li>
-          <li><strong>Pas de reflet</strong> sur l'écran (éteins la lumière derrière toi si besoin).</li>
-          <li><strong>Photo nette</strong> : appuie sur l'écran du téléphone pour faire la mise au point.</li>
-          <li>Une capture d'écran reste toujours plus fiable qu'une photo, si c'est possible.</li>
+          <li data-i18n-html="tips.1"><strong>Bien en face</strong> de l'écran, téléphone droit (pas en biais).</li>
+          <li data-i18n-html="tips.2"><strong>La grille des esprits en grand</strong> : rapproche-toi pour qu'elle remplisse la photo.</li>
+          <li data-i18n-html="tips.3"><strong>Pas de reflet</strong> sur l'écran (éteins la lumière derrière toi si besoin).</li>
+          <li data-i18n-html="tips.4"><strong>Photo nette</strong> : appuie sur l'écran du téléphone pour faire la mise au point.</li>
+          <li data-i18n="tips.5">Une capture d'écran reste toujours plus fiable qu'une photo, si c'est possible.</li>
         </ul>
       </details>
 
       <div class="scan-progress" id="scan-progress" hidden>
-        <div class="scan-progress-label" id="scan-progress-label">Analyse…</div>
+        <div class="scan-progress-label" id="scan-progress-label" data-i18n="scan.analysing">Analyse…</div>
         <div class="progress-bar"><div class="progress-scan" id="scan-progress-bar"></div></div>
       </div>
 
@@ -130,35 +137,35 @@
 
     <section class="toolbar">
       <input id="search" type="search"
-        placeholder="Rechercher un esprit..." aria-label="Rechercher un esprit">
+        placeholder="Rechercher un esprit..." data-i18n-attr="placeholder:search.placeholder;aria-label:search.placeholder">
     </section>
 
     <section class="filters">
       <div class="filter-row">
-        <span class="filter-label">Saison</span>
-        <div class="chips" id="season-chips" role="group" aria-label="Filtrer par saison"></div>
+        <span class="filter-label" data-i18n="filter.season">Saison</span>
+        <div class="chips" id="season-chips" role="group" data-i18n-attr="aria-label:filter.season"></div>
       </div>
       <div class="filter-row">
-        <span class="filter-label">Statut</span>
-        <div class="chips" id="status-filter" role="group" aria-label="Filtrer par statut">
-          <button type="button" class="chip active" data-status="all">Tous</button>
-          <button type="button" class="chip" data-status="owned">Possédés</button>
-          <button type="button" class="chip" data-status="missing">Manquants</button>
-          <button type="button" class="chip chip-icon" data-status="mastered" title="Maîtrisés" aria-label="Maîtrisés"><span class="crown-icon" aria-hidden="true"></span>Maîtrisés</button>
-          <button type="button" class="chip chip-icon" data-status="unmastered" title="Possédés mais pas maîtrisés" aria-label="À maîtriser"><span class="crown-icon outline" aria-hidden="true"></span>À maîtriser</button>
+        <span class="filter-label" data-i18n="filter.status">Statut</span>
+        <div class="chips" id="status-filter" role="group" data-i18n-attr="aria-label:filter.status">
+          <button type="button" class="chip active" data-status="all" data-i18n="status.all">Tous</button>
+          <button type="button" class="chip" data-status="owned" data-i18n="status.owned">Possédés</button>
+          <button type="button" class="chip" data-status="missing" data-i18n="status.missing">Manquants</button>
+          <button type="button" class="chip chip-icon" data-status="mastered" data-i18n-attr="title:status.mastered"><span class="crown-icon" aria-hidden="true"></span><span data-i18n="status.mastered">Maîtrisés</span></button>
+          <button type="button" class="chip chip-icon" data-status="unmastered" data-i18n-attr="title:status.unmasteredTitle"><span class="crown-icon outline" aria-hidden="true"></span><span data-i18n="status.unmastered">À maîtriser</span></button>
         </div>
       </div>
       <div class="filter-row">
-        <span class="filter-label">Rareté</span>
-        <div class="chips" id="rarity-chips" role="group" aria-label="Filtrer par rareté"></div>
+        <span class="filter-label" data-i18n="filter.rarity">Rareté</span>
+        <div class="chips" id="rarity-chips" role="group" data-i18n-attr="aria-label:filter.rarity"></div>
       </div>
       <div class="filter-row">
-        <span class="filter-label">Variante</span>
-        <div class="chips" id="variant-chips" role="group" aria-label="Filtrer par variante"></div>
+        <span class="filter-label" data-i18n="filter.variant">Variante</span>
+        <div class="chips" id="variant-chips" role="group" data-i18n-attr="aria-label:filter.variant"></div>
       </div>
       <div class="filter-row">
-        <span class="filter-label">Tri</span>
-        <div class="chips" id="sort-chips" role="group" aria-label="Trier"></div>
+        <span class="filter-label" data-i18n="filter.sort">Tri</span>
+        <div class="chips" id="sort-chips" role="group" data-i18n-attr="aria-label:filter.sort"></div>
       </div>
 
       <!-- valeurs des filtres (cachées) : les boutons ci-dessus les modifient -->
@@ -167,35 +174,35 @@
         <select id="variant-filter"><option value="">Toutes</option></select>
         <select id="season-filter"><option value="">Toutes</option></select>
         <select id="sort">
-          <option value="name">Nom</option>
-          <option value="rarity">Rareté</option>
-          <option value="season">Saison</option>
-          <option value="status">À faire d'abord</option>
+          <option value="name" data-i18n="sort.name">Nom</option>
+          <option value="rarity" data-i18n="sort.rarity">Rareté</option>
+          <option value="season" data-i18n="sort.season">Saison</option>
+          <option value="status" data-i18n="sort.status">À faire d'abord</option>
         </select>
       </div>
     </section>
 
-    <p id="status" aria-live="polite">Chargement du catalogue...</p>
+    <p id="status" aria-live="polite" data-i18n="list.loading">Chargement du catalogue...</p>
     <section id="spirits" class="grid"></section>
-    <p id="empty" class="empty" hidden>Aucun esprit ne correspond à ta recherche.</p>
+    <p id="empty" class="empty" hidden data-i18n="list.empty">Aucun esprit ne correspond à ta recherche.</p>
 
     <section class="backup">
-      <h2>Sauvegarde</h2>
+      <h2 data-i18n="backup.title">Sauvegarde</h2>
       <div id="sync" class="sync" hidden>
         <div class="sync-text">
-          <strong>☁️ Synchronisation entre appareils</strong>
-          <span id="sync-status" class="sync-status">Chargement…</span>
+          <strong data-i18n="sync.title">☁️ Synchronisation entre appareils</strong>
+          <span id="sync-status" class="sync-status" data-i18n="sync.loading">Chargement…</span>
           <span id="sync-who" class="sync-who"></span>
         </div>
-        <button type="button" id="sync-signin">Se connecter avec Google</button>
-        <button type="button" id="sync-signout" class="secondary" hidden>Se déconnecter</button>
+        <button type="button" id="sync-signin" data-i18n="sync.signin">Se connecter avec Google</button>
+        <button type="button" id="sync-signout" class="secondary" hidden data-i18n="sync.signout">Se déconnecter</button>
       </div>
-      <p id="backup-text">Ta progression est enregistrée dans ce navigateur. Exporte-la pour la garder ou la transférer sur un autre appareil.</p>
-      <p class="backup-tip">📱 Sur téléphone, ajoute le site à ton écran d'accueil (Safari : Partager → « Sur l'écran d'accueil » ; Chrome : ⋮ → « Ajouter à l'écran d'accueil »). Il s'ouvre alors comme une appli, et sur iPhone ta progression ne risque plus d'être effacée si tu ne viens pas pendant une semaine.</p>
+      <p id="backup-text" data-i18n="backup.local">Ta progression est enregistrée dans ce navigateur. Exporte-la pour la garder ou la transférer sur un autre appareil.</p>
+      <p class="backup-tip" data-i18n="backup.tip">📱 Sur téléphone, ajoute le site à ton écran d'accueil (Safari : Partager → « Sur l'écran d'accueil » ; Chrome : ⋮ → « Ajouter à l'écran d'accueil »). Il s'ouvre alors comme une appli, et sur iPhone ta progression ne risque plus d'être effacée si tu ne viens pas pendant une semaine.</p>
       <div class="backup-actions">
-        <button type="button" id="export" class="secondary">Exporter</button>
-        <button type="button" id="import" class="secondary">Importer</button>
-        <button type="button" id="reset" class="danger">Tout réinitialiser</button>
+        <button type="button" id="export" class="secondary" data-i18n="backup.export">Exporter</button>
+        <button type="button" id="import" class="secondary" data-i18n="backup.import">Importer</button>
+        <button type="button" id="reset" class="danger" data-i18n="backup.reset">Tout réinitialiser</button>
         <input type="file" id="import-file" accept="application/json,.json" hidden>
       </div>
     </section>
@@ -206,42 +213,61 @@
   <!-- Thème personnalisé : couleurs au choix + fond pris dans la galerie -->
   <dialog id="custom-theme" class="custom-theme" aria-labelledby="custom-theme-title">
     <form method="dialog">
-      <h2 id="custom-theme-title">🎨 Mon thème</h2>
+      <h2 id="custom-theme-title" data-i18n="custom.title">🎨 Mon thème</h2>
       <div class="custom-colors">
-        <label>Fond <input type="color" id="ct-bg"></label>
-        <label>Cartes <input type="color" id="ct-panel"></label>
-        <label>Boutons <input type="color" id="ct-accent"></label>
+        <label><span data-i18n="custom.bg">Fond</span> <input type="color" id="ct-bg"></label>
+        <label><span data-i18n="custom.panel">Cartes</span> <input type="color" id="ct-panel"></label>
+        <label><span data-i18n="custom.accent">Boutons</span> <input type="color" id="ct-accent"></label>
       </div>
 
-      <h3>Image de fond</h3>
+      <h3 data-i18n="custom.image">Image de fond</h3>
       <div class="custom-image-row">
         <div id="ct-preview" class="custom-preview" aria-hidden="true"></div>
         <div class="custom-image-buttons">
-          <button type="button" id="ct-pick">🖼️ Choisir une image</button>
-          <button type="button" id="ct-remove" class="secondary">Retirer l'image</button>
+          <button type="button" id="ct-pick" data-i18n="custom.pick">🖼️ Choisir une image</button>
+          <button type="button" id="ct-remove" class="secondary" data-i18n="custom.remove">Retirer l'image</button>
         </div>
       </div>
       <input type="file" id="ct-file" accept="image/*" hidden>
-      <label class="custom-range">Voile sur l'image (pour bien lire)
+      <label class="custom-range"><span data-i18n="custom.dim">Voile sur l'image (pour bien lire)</span>
         <input type="range" id="ct-dim" min="0" max="90" step="5">
       </label>
-      <label class="custom-range">Cartes transparentes
+      <label class="custom-range"><span data-i18n="custom.glass">Cartes transparentes</span>
         <input type="range" id="ct-glass" min="0" max="70" step="5">
       </label>
 
       <div class="custom-actions">
-        <button type="button" id="ct-reset" class="secondary">Revenir au violet</button>
-        <button type="submit" value="ok">Terminé</button>
+        <button type="button" id="ct-reset" class="secondary" data-i18n="custom.reset">Revenir au violet</button>
+        <button type="submit" value="ok" data-i18n="custom.done">Terminé</button>
       </div>
     </form>
   </dialog>
 
-  <script src="spirits-data.js?v=2026-11-12.1"></script>
+  <!-- Fiche d'un esprit (clic sur sa carte) : ce qu'il fait, comme sur fortnite.gg -->
+  <dialog id="spirit-detail" class="spirit-detail" aria-labelledby="sd-name">
+    <button type="button" class="icon-button sd-close" id="sd-close" data-i18n-attr="aria-label:detail.close">✕</button>
+    <div class="sd-top">
+      <div class="sd-art"><img id="sd-img" alt=""><div class="mastery-crown" aria-hidden="true"></div></div>
+      <div class="sd-head">
+        <h2 id="sd-name"></h2>
+        <div class="tags" id="sd-tags"></div>
+        <div class="checks" id="sd-checks"></div>
+      </div>
+    </div>
+    <div id="sd-body" class="sd-body"></div>
+    <div class="sd-foot">
+      <span data-i18n="detail.source">Infos : fortnite.gg</span>
+      <a id="sd-link" href="https://fortnite.gg/sprites" target="_blank" rel="noopener" data-i18n="detail.more">Voir sur fortnite.gg</a>
+    </div>
+  </dialog>
+
+  <script src="spirits-data.js?v=2026-11-12.4"></script>
   <!-- scanner.js et spirits-fingerprints.js (1,7 Mo) sont chargés par app.js
        seulement quand on s'apprête à scanner -->
-  <script src="app.js?v=2026-11-12.1"></script>
-  <script src="collection-image.js?v=2026-11-12.1"></script>
-  <script src="firebase-config.js?v=2026-11-12.1"></script>
-  <script type="module" src="sync.js?v=2026-11-12.1"></script>
+  <script src="spirits-details.js?v=2026-11-12.4"></script>
+  <script src="app.js?v=2026-11-12.4"></script>
+  <script src="collection-image.js?v=2026-11-12.4"></script>
+  <script src="firebase-config.js?v=2026-11-12.4"></script>
+  <script type="module" src="sync.js?v=2026-11-12.4"></script>
 </body>
 </html>

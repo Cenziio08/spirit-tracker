@@ -4,15 +4,18 @@ const STORAGE_KEY = "spirit-tracker-progress";
 localStorage.removeItem("spirit-tracker-catalog");
 
 // Ordre et libellés des raretés (les raretés inconnues passent à la fin)
+// (les noms affichés viennent de i18n.js : rarity.<clé>)
 const RARITIES = {
-  common: { label: "Commun", order: 0 },
-  uncommon: { label: "Peu commun", order: 1 },
-  rare: { label: "Rare", order: 2 },
-  epic: { label: "Épique", order: 3 },
-  legendary: { label: "Légendaire", order: 4 },
-  mythic: { label: "Mythique", order: 5 },
-  special: { label: "Spécial", order: 6 }
+  common: { order: 0 },
+  uncommon: { order: 1 },
+  rare: { order: 2 },
+  epic: { order: 3 },
+  legendary: { order: 4 },
+  mythic: { order: 5 },
+  special: { order: 6 }
 };
+
+const t = (key, vars) => window.I18N.t(key, vars);
 
 // Noms des variantes (tels qu'affichés dans le jeu)
 const VARIANTS = {
@@ -126,7 +129,7 @@ function capitalize(text = "") {
 }
 
 function rarityLabel(rarity) {
-  return RARITIES[rarity]?.label || capitalize(rarity || "Inconnue");
+  return RARITIES[rarity] ? t(`rarity.${rarity}`) : capitalize(rarity || t("rarity.unknown"));
 }
 
 function rarityOrder(rarity) {
@@ -141,12 +144,12 @@ function variantLabel(variant) {
   return VARIANTS[variant] || capitalize(prettyName(variant));
 }
 
-// "c7s3" -> "Ch. 7 S3", "c7ms" -> "Ch. 7 Mini-saison"
+// "c7s3" -> "Ch. 7 S3", "c7ms" -> "Ch. 7 Mini-saison" / "Ch. 7 Mini Season"
 function seasonLabel(season) {
   const match = /^c(\d+)(?:s(\d+)|(ms))$/i.exec(season || "");
   if (!match) return season || "—";
   return match[3]
-    ? `Ch. ${match[1]} Mini-saison`
+    ? `Ch. ${match[1]} ${t("season.mini")}`
     : `Ch. ${match[1]} S${match[2]}`;
 }
 
@@ -155,6 +158,11 @@ function seasonValue(season) {
   const match = /^c(\d+)(?:s(\d+)|(ms))$/i.exec(season || "");
   if (!match) return 0;
   return Number(match[1]) * 100 + (match[3] ? 45 : Number(match[2]) * 10);
+}
+
+// "45 %" en français, "45%" en anglais
+function percentText(n) {
+  return window.I18N.lang === "fr" ? `${n} %` : `${n}%`;
 }
 
 let toastTimer;
@@ -196,7 +204,7 @@ function updateStats() {
   });
 
   const percent = total ? Math.round(mastered / total * 100) : 0;
-  $("progress").textContent = percent + "%";
+  $("progress").textContent = percentText(percent);
   $("bar-owned").style.width = total ? (owned / total * 100) + "%" : "0";
   $("bar-mastered").style.width = total ? (mastered / total * 100) + "%" : "0";
 
@@ -247,15 +255,15 @@ function updateSeasonStats() {
       card.classList.toggle("complete", mastered === total);
       card.setAttribute("aria-pressed", String(seasonFilter.value === season));
       card.title = seasonFilter.value === season
-        ? "Afficher toutes les saisons"
-        : `Afficher seulement ${seasonLabel(season)}`;
+        ? t("season.showAll")
+        : t("season.showOnly", { season: seasonLabel(season) });
 
       const head = document.createElement("span");
       head.className = "season-stat-head";
       const name = document.createElement("strong");
       name.textContent = seasonLabel(season);
       const percent = document.createElement("span");
-      percent.textContent = (mastered === total ? "✓ " : "") + Math.round(mastered / total * 100) + " %";
+      percent.textContent = (mastered === total ? "✓ " : "") + percentText(Math.round(mastered / total * 100));
       head.append(name, percent);
 
       const bar = document.createElement("span");
@@ -272,7 +280,7 @@ function updateSeasonStats() {
       counts.className = "season-stat-counts";
       const o = document.createElement("span");
       o.className = "count-owned";
-      o.textContent = `${owned}/${total} possédés`;
+      o.textContent = t("season.ownedCount", { owned, total });
       const m = document.createElement("span");
       m.className = "count-mastered";
       m.textContent = `👑 ${mastered}/${total}`;
@@ -357,9 +365,11 @@ function getVisibleSpirits() {
       spirit.variant,
       variantLabel(spirit.variant),
       spirit.rarity,
-      rarityLabel(spirit.rarity),
+      window.I18N.DICT.fr[`rarity.${spirit.rarity}`] || "",
+      window.I18N.DICT.en[`rarity.${spirit.rarity}`] || "",
       seasonLabel(spirit.season),
-      spirit.unreleased ? "pas encore sorti bientôt leak" : ""
+      spirit.season?.endsWith("ms") ? "mini-saison mini season" : "",
+      spirit.unreleased ? "pas encore sorti bientôt leak not out yet soon upcoming" : ""
     ].join(" ");
 
     return normalize(text).includes(search)
@@ -451,6 +461,21 @@ function createCard(spirit) {
   const title = document.createElement("h3");
   title.textContent = name;
 
+  // clic sur l'image ou le nom : fiche de l'esprit (ce qu'il fait)
+  [art, title].forEach(zone => {
+    zone.classList.add("opens-detail");
+    zone.tabIndex = zone === art ? 0 : -1;
+    zone.setAttribute("role", zone === art ? "button" : "presentation");
+    if (zone === art) zone.setAttribute("aria-label", t("card.details", { name }));
+    zone.addEventListener("click", () => openSpiritDetail(spirit));
+    zone.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openSpiritDetail(spirit);
+      }
+    });
+  });
+
   const tags = document.createElement("div");
   tags.className = "tags";
 
@@ -467,7 +492,7 @@ function createCard(spirit) {
   if (spirit.unreleased) {
     const upcoming = document.createElement("span");
     upcoming.className = "tag upcoming-tag";
-    upcoming.textContent = "Pas encore sorti";
+    upcoming.textContent = t("card.upcoming");
     tags.append(upcoming);
   }
 
@@ -478,8 +503,8 @@ function createCard(spirit) {
     tags.append(season);
   }
 
-  const owned = createCheckbox("Possédé", "check-owned", saved.owned);
-  const mastered = createCheckbox("Maîtrisé", "check-mastered", saved.mastered);
+  const owned = createCheckbox(t("card.owned"), "check-owned", saved.owned);
+  const mastered = createCheckbox(t("card.mastered"), "check-mastered", saved.mastered);
 
   function update(next) {
     progress[key] = next;
@@ -531,9 +556,9 @@ function renderSpirits() {
       const count = visible.filter(s => s.season === spirit.season).length;
       const title = document.createElement("h2");
       title.className = "season-heading";
-      title.textContent = spirit.season ? seasonLabel(spirit.season) : "Autres";
+      title.textContent = spirit.season ? seasonLabel(spirit.season) : t("season.others");
       const small = document.createElement("span");
-      small.textContent = `${count} esprit(s)`;
+      small.textContent = t("season.count", { n: count });
       title.append(small);
       fragment.append(title);
     }
@@ -544,8 +569,7 @@ function renderSpirits() {
   emptyElement.hidden = visible.length > 0 || spirits.length === 0;
 
   if (spirits.length) {
-    statusElement.textContent =
-      `${visible.length} esprit(s) affiché(s) sur ${spirits.length}.`;
+    statusElement.textContent = t("list.count", { n: visible.length, total: spirits.length });
   }
 
   updateStats();
@@ -584,7 +608,7 @@ function exportProgress() {
   link.click();
   // libéré un peu plus tard : certains navigateurs annulent le téléchargement sinon
   setTimeout(() => URL.revokeObjectURL(link.href), 10000);
-  toast("Progression exportée.");
+  toast(t("backup.exported"));
 }
 
 // Retrouve l'identifiant d'un esprit dans une entrée de détection :
@@ -619,7 +643,7 @@ function importGameDetection(list) {
   });
 
   if (!updates.length) {
-    toast("Aucun esprit de ce fichier n'a été reconnu.");
+    toast(t("detect.none"));
     return;
   }
 
@@ -632,14 +656,11 @@ function importGameDetection(list) {
   });
 
   const masteredCount = updates.filter(u => u.mastered).length;
-  let message =
-    `Détection du jeu : ${updates.length} esprit(s) reconnu(s)\n` +
-    `• ${masteredCount} maîtrisé(s), ${updates.length - masteredCount} possédé(s) sans couronne\n` +
-    `• Nouveautés pour toi : ${newOwned} possédé(s), ${newMastered} maîtrisé(s)\n`;
-  if (unknown.length) {
-    message += `• ${unknown.length} non reconnu(s) : ${unknown.slice(0, 5).join(", ")}${unknown.length > 5 ? "…" : ""}\n`;
-  }
-  message += "\nAppliquer ? (rien ne sera décoché)";
+  const message = t("detect.confirm", {
+    n: updates.length, mastered: masteredCount, plain: updates.length - masteredCount,
+    newOwned, newMastered, unknown: unknown.length,
+    unknownList: unknown.slice(0, 5).join(", ") + (unknown.length > 5 ? "…" : "")
+  });
 
   if (!confirm(message)) return;
 
@@ -651,7 +672,7 @@ function importGameDetection(list) {
 
   saveProgress();
   renderSpirits();
-  toast(`Import terminé : +${newOwned} possédé(s), +${newMastered} maîtrisé(s).`);
+  toast(t("detect.done", { newOwned, newMastered }));
 }
 
 async function importProgress(file) {
@@ -677,28 +698,28 @@ async function importProgress(file) {
       if (owned) clean[key] = { owned, mastered };
     });
 
-    if (!confirm(`Importer ${Object.keys(clean).length} esprit(s) ? Ta progression actuelle sera remplacée.`)) {
+    if (!confirm(t("backup.importConfirm", { n: Object.keys(clean).length }))) {
       return;
     }
 
     progress = clean;
     saveProgress();
     renderSpirits();
-    toast("Progression importée !");
+    toast(t("backup.imported"));
   } catch (error) {
     console.error(error);
-    toast("Ce fichier n'est pas une sauvegarde valide.");
+    toast(t("backup.invalid"));
   }
 }
 
 function resetProgress() {
-  if (!confirm("Effacer toute ta progression ? Cette action est irréversible.")) {
+  if (!confirm(t("backup.resetConfirm"))) {
     return;
   }
   progress = {};
   saveProgress();
   renderSpirits();
-  toast("Progression réinitialisée.");
+  toast(t("backup.resetDone"));
 }
 
 /* ---------- Scanner de captures d'écran ---------- */
@@ -741,7 +762,7 @@ window.SpiritLoadScanner = loadScanner; // pour tests/photo-test.js
 async function runScan(files) {
   const images = [...files].filter(f => f.type.startsWith("image/"));
   if (!images.length) {
-    toast("Ajoute des images (captures d'écran du jeu).");
+    toast(t("scan.noImages"));
     return;
   }
   if (scanning) {
@@ -757,7 +778,7 @@ async function runScan(files) {
   try {
     if (!window.SpiritScanner) {
       $("scan-progress-bar").style.width = "0%";
-      $("scan-progress-label").textContent = "Chargement du scanner…";
+      $("scan-progress-label").textContent = t("scan.loading");
       await loadScanner();
     }
     const result = await window.SpiritScanner.scan(images, (fraction, label) => {
@@ -769,8 +790,8 @@ async function runScan(files) {
   } catch (error) {
     console.error(error);
     toast(String(error.message).startsWith("Impossible de charger")
-      ? "Le scanner n'a pas pu se charger : vérifie ta connexion et réessaie."
-      : "Erreur pendant l'analyse des captures.");
+      ? t("scan.loadError")
+      : t("scan.error"));
   } finally {
     progressBox.hidden = true;
     scanning = false;
@@ -813,9 +834,8 @@ function appendDoubtful(report, result) {
 
   const box = el("div", "scan-doubtful");
   box.append(
-    el("strong", null, `À vérifier (${items.length})`),
-    el("p", "scan-note",
-      "Le scanner n'est pas sûr de ceux-là (photo floue ou de biais). Confirme ceux qui sont justes, en précisant s'ils ont la couronne ; les autres seront ignorés.")
+    el("strong", null, t("scan.doubtTitle", { n: items.length })),
+    el("p", "scan-note", t("scan.doubtHelp"))
   );
   const grid = el("div", "scan-grid");
   items.forEach(d => {
@@ -833,10 +853,10 @@ function appendDoubtful(report, result) {
       saveProgress();
       renderSpirits();
       tile.classList.add("is-confirmed");
-      buttons.replaceWith(el("div", "scan-tile-badge", mastered ? "👑 Ajouté" : "✓ Ajouté"));
+      buttons.replaceWith(el("div", "scan-tile-badge", mastered ? t("scan.addedCrown") : t("scan.added1")));
     };
-    const owned = el("button", "scan-confirm secondary", "✓ Je l'ai");
-    const crowned = el("button", "scan-confirm" + (d.crowned ? "" : " secondary"), "👑 Maîtrisé");
+    const owned = el("button", "scan-confirm secondary", t("scan.haveIt"));
+    const crowned = el("button", "scan-confirm" + (d.crowned ? "" : " secondary"), t("scan.mastered"));
     [owned, crowned].forEach(b => { b.type = "button"; });
     owned.addEventListener("click", () => confirm(false));
     crowned.addEventListener("click", () => confirm(true));
@@ -858,9 +878,8 @@ function showScanReport(result, rows, info) {
 
   if (!rows.length) {
     summary.append(
-      el("strong", null, result.doubtful?.length ? "Aucun esprit reconnu avec certitude." : "Aucun esprit reconnu."),
-      el("span", null,
-        " Vérifie que l'image montre bien la grille des esprits (onglet Esprits). Pour une photo : bien en face, nette, sans reflet.")
+      el("strong", null, result.doubtful?.length ? t("scan.noneSure") : t("scan.none")),
+      el("span", null, t("scan.noneHelp"))
     );
     head.append(summary);
     report.append(head);
@@ -869,25 +888,23 @@ function showScanReport(result, rows, info) {
   }
 
   summary.append(
-    el("strong", null,
-      `${rows.length} esprit(s) reconnu(s) sur ${result.files} image(s)`),
-    el("span", null,
-      ` — +${info.newOwned} possédé(s), +${info.newMastered} maîtrisé(s) ajouté(s) à ta collection.`)
+    el("strong", null, t("scan.summary", { n: rows.length, files: result.files })),
+    el("span", null, t("scan.added", { owned: info.newOwned, mastered: info.newMastered }))
   );
 
-  const undo = el("button", "secondary", "Annuler");
+  const undo = el("button", "secondary", t("scan.undo"));
   undo.type = "button";
   undo.addEventListener("click", () => {
     progress = JSON.parse(info.before);
     saveProgress();
     renderSpirits();
     report.hidden = true;
-    toast("Scan annulé : ta progression est revenue comme avant.");
+    toast(t("scan.undone"));
   });
 
   const close = el("button", "icon-button", "✕");
   close.type = "button";
-  close.setAttribute("aria-label", "Fermer le rapport");
+  close.setAttribute("aria-label", t("scan.close"));
   close.addEventListener("click", () => { report.hidden = true; });
 
   head.append(summary, undo, close);
@@ -896,9 +913,7 @@ function showScanReport(result, rows, info) {
   appendDoubtful(report, result);
 
   if (info.uncertain) {
-    report.append(el("p", "scan-note",
-      `${info.uncertain} esprit(s) étaient coupés en haut de la capture : leur couronne n'était pas visible. ` +
-      "Ils sont cochés « Possédé » ; vérifie leur maîtrise ou ajoute une capture où ils sont entiers."));
+    report.append(el("p", "scan-note", t("scan.cutTop", { n: info.uncertain })));
   }
 
   // Esprits attendus de la même saison mais absents des captures
@@ -907,14 +922,14 @@ function showScanReport(result, rows, info) {
   const missing = spirits.filter(s =>
     seasons.has(s.season) && !s.unreleased && !seenKeys.has(getKey(s)) && !getState(s).owned);
   if (missing.length && missing.length <= 40) {
-    report.append(el("p", "scan-note",
-      `Pas vu dans tes captures (${missing.length}) : ` +
-      missing.map(s => `${displayName(s)}${s.variant !== "base" ? " " + variantLabel(s.variant) : ""}`).join(", ") +
-      ". Si tu les as, ajoute une capture de l'endroit où ils apparaissent."));
+    report.append(el("p", "scan-note", t("scan.notSeen", {
+      n: missing.length,
+      list: missing.map(s => `${displayName(s)}${s.variant !== "base" ? " " + variantLabel(s.variant) : ""}`).join(", ")
+    })));
   }
 
   const details = el("details", "scan-details");
-  const sum = el("summary", null, "Voir le détail des esprits reconnus");
+  const sum = el("summary", null, t("scan.details"));
   details.append(sum);
 
   const grid = el("div", "scan-grid");
@@ -929,8 +944,8 @@ function showScanReport(result, rows, info) {
       const label = el("div", "scan-tile-name",
         `${displayName(spirit)}${spirit.variant !== "base" ? " · " + variantLabel(spirit.variant) : ""}`);
       const badge = el("div", "scan-tile-badge",
-        mastered ? "👑 Maîtrisé" : "✓ Possédé");
-      if (isNewMastered || isNewOwned) badge.append(el("span", "scan-new", " nouveau"));
+        mastered ? t("scan.mastered") : t("scan.owned"));
+      if (isNewMastered || isNewOwned) badge.append(el("span", "scan-new", t("scan.new")));
       tile.append(img, label, badge);
       grid.append(tile);
     });
@@ -939,19 +954,17 @@ function showScanReport(result, rows, info) {
 
   if (result.unknown.length) {
     const unk = el("details", "scan-details");
-    unk.append(el("summary", null,
-      `${result.unknown.length} case(s) non reconnue(s)`));
+    unk.append(el("summary", null, t("scan.unknown", { n: result.unknown.length })));
     const ugrid = el("div", "scan-grid");
     result.unknown.forEach(u => {
       const tile = el("div", "scan-tile");
       const img = el("img");
       img.src = u.thumb;
       img.alt = "";
-      tile.append(img, el("div", "scan-tile-name", "Non reconnu"));
+      tile.append(img, el("div", "scan-tile-name", t("scan.unknownTile")));
       ugrid.append(tile);
     });
-    unk.append(el("p", "scan-note",
-      "Souvent un esprit tout nouveau : demande une mise à jour de la liste (spirits-data.js) et des empreintes."), ugrid);
+    unk.append(el("p", "scan-note", t("scan.unknownHelp")), ugrid);
     report.append(unk);
   }
 
@@ -1032,13 +1045,14 @@ $("reset").addEventListener("click", resetProgress);
 
 // Chaque rangée de boutons reflète un <select> caché, qui garde la valeur et
 // déclenche "change" (le reste du code ne lit que les <select>).
-function chipRow(select, container, { first = "Toutes", short = null, rarity = false } = {}) {
+const chipRenderers = [];
+function chipRow(select, container, { first = null, short = null, rarity = false } = {}) {
   function render() {
     const fragment = document.createDocumentFragment();
     [...select.options].forEach((option, i) => {
       const chip = el("button", "chip");
       chip.type = "button";
-      chip.textContent = i === 0 && option.value === "" ? first : (short ? short(option.value, option.text) : option.text);
+      chip.textContent = i === 0 && option.value === "" && first ? t(first) : (short ? short(option.value, option.text) : option.text);
       if (rarity && option.value) chip.classList.add("chip-rarity", `rarity-${option.value}`);
       const active = option.value === select.value;
       chip.classList.toggle("active", active);
@@ -1060,25 +1074,26 @@ function chipRow(select, container, { first = "Toutes", short = null, rarity = f
   // options recréées quand le catalogue change ; valeur changée par le code
   new MutationObserver(render).observe(select, { childList: true });
   select.addEventListener("change", render);
+  chipRenderers.push(render);
   render();
 }
 
-chipRow(seasonFilter, $("season-chips"), { first: "Toutes" });
-chipRow(rarityFilter, $("rarity-chips"), { first: "Toutes", rarity: true });
-chipRow(variantFilter, $("variant-chips"), { first: "Toutes" });
+chipRow(seasonFilter, $("season-chips"), { first: "filter.all" });
+chipRow(rarityFilter, $("rarity-chips"), { first: "filter.all", rarity: true });
+chipRow(variantFilter, $("variant-chips"), { first: "filter.all" });
 chipRow(sortElement, $("sort-chips"));
 
 /* ---------- Thèmes ---------- */
 
 const THEME_KEY = "spirit-tracker-theme";
-// [valeur, nom, couleurs de la pastille (fond, accent)]
+// [valeur, clé du nom (i18n.js), couleurs de la pastille (fond, accent)]
 const THEMES = [
-  ["", "Violet (d'origine)", "#10111b", "#7651e8"],
-  ["sombre", "Sombre", "#0b0b0e", "#6b7280"],
-  ["clair", "Clair", "#eef0f6", "#6a43e0"],
-  ["fortnite", "Fortnite", "#0e2865", "#f8e548"],
-  ["hacker", "Système hacké", "#050a07", "#19c35a"],
-  ["rose", "Rose bonbon", "#2a1729", "#e0479e"]
+  ["", "theme.violet", "#10111b", "#7651e8"],
+  ["sombre", "theme.sombre", "#0b0b0e", "#6b7280"],
+  ["clair", "theme.clair", "#eef0f6", "#6a43e0"],
+  ["fortnite", "theme.fortnite", "#0e2865", "#f8e548"],
+  ["hacker", "theme.hacker", "#050a07", "#19c35a"],
+  ["rose", "theme.rose", "#2a1729", "#e0479e"]
 ];
 
 const CUSTOM_KEY = "spirit-tracker-custom-theme";
@@ -1114,7 +1129,10 @@ function applyTheme(theme) {
     const swatch = document.createElement("span");
     swatch.className = "theme-swatch";
     swatch.style.background = swatchBg;
-    option.append(swatch, label);
+    const text = document.createElement("span");
+    text.dataset.i18n = label;
+    text.textContent = t(label);
+    option.append(swatch, text);
     option.addEventListener("click", () => {
       close();
       onClick();
@@ -1129,7 +1147,7 @@ function applyTheme(theme) {
       toggle.focus();
     });
   });
-  const customOption = addOption("perso", "Mon thème…", "", () => openCustomTheme(), "theme-custom-option");
+  const customOption = addOption("perso", "theme.custom", "", () => openCustomTheme(), "theme-custom-option");
   const paintCustomSwatch = () => {
     const c = SpiritTheme.load(), img = SpiritTheme.image();
     customOption.querySelector(".theme-swatch").style.background = img
@@ -1176,7 +1194,7 @@ function applyTheme(theme) {
   function refreshImageUI() {
     const img = SpiritTheme.image();
     preview.style.backgroundImage = img ? `url("${img}")` : "none";
-    preview.textContent = img ? "" : "Aucune";
+    preview.textContent = img ? "" : t("custom.none");
     $("ct-remove").hidden = !img;
     // voile et transparence ne servent qu'avec une image
     [inputs.dim, inputs.glass].forEach(i => {
@@ -1212,7 +1230,7 @@ function applyTheme(theme) {
       localStorage.setItem(CUSTOM_BG_KEY, dataUrl);
     } catch (e) {
       console.error(e);
-      toast("Impossible d'utiliser cette image, essaie une autre.");
+      toast(t("custom.badImage"));
       return;
     }
     refreshImageUI();
@@ -1252,6 +1270,137 @@ function applyTheme(theme) {
     return canvas.toDataURL("image/jpeg", 0.4);
   }
 })();
+
+/* ---------- Fiche d'un esprit (clic sur la carte) ---------- */
+
+const DETAILS = window.SPIRITS_DETAILS || { strings: { en: [], fr: [] }, map: {} };
+
+// Phrase n° i dans la langue choisie (anglais si la traduction manque)
+function detailText(i) {
+  if (i == null || i < 0) return "";
+  const text = DETAILS.strings[window.I18N.lang]?.[i] || DETAILS.strings.en[i] || "";
+  return window.I18N.typo(text.replace(/ -> /g, " → "));
+}
+
+// "2,700" -> "2 700" et "0.53%" -> "0,53 %" en français
+function detailNumber(value) {
+  if (window.I18N.lang !== "fr") return value;
+  return String(value).replace(/,/g, " ").replace(/\./g, ",").replace(/%$/, " %");
+}
+
+let detailSpirit = null;
+
+function openSpiritDetail(spirit) {
+  detailSpirit = spirit;
+  fillSpiritDetail();
+  const dialog = $("spirit-detail");
+  if (!dialog.open) dialog.showModal();
+}
+
+function fillSpiritDetail() {
+  const spirit = detailSpirit;
+  if (!spirit) return;
+  const state = getState(spirit);
+  const name = displayName(spirit);
+  const variant = spirit.variant !== "base" ? ` ${variantLabel(spirit.variant)}` : "";
+
+  const img = $("sd-img");
+  img.onerror = () => { if (spirit.remoteUrl && img.src !== spirit.remoteUrl) img.src = spirit.remoteUrl; };
+  img.src = spirit.url;
+  img.alt = name;
+  const box = $("spirit-detail");
+  box.className = `spirit-detail rarity-${spirit.rarity || "unknown"}`;
+  box.classList.toggle("owned", state.owned);
+  box.classList.toggle("mastered", state.mastered);
+  $("sd-name").textContent = name + variant;
+
+  const tags = $("sd-tags");
+  tags.replaceChildren(el("span", "tag rarity-tag", rarityLabel(spirit.rarity)),
+    el("span", "tag", variantLabel(spirit.variant)));
+  if (spirit.unreleased) tags.append(el("span", "tag upcoming-tag", t("card.upcoming")));
+  if (spirit.season) tags.append(el("span", "tag", seasonLabel(spirit.season)));
+
+  // mêmes cases que sur la carte (Maîtrisé implique Possédé)
+  const checks = $("sd-checks");
+  const owned = createCheckbox(t("card.owned"), "check-owned", state.owned);
+  const mastered = createCheckbox(t("card.mastered"), "check-mastered", state.mastered);
+  const save = next => {
+    const key = getKey(spirit);
+    if (next.owned || next.mastered) progress[key] = next; else delete progress[key];
+    saveProgress();
+    renderSpirits();
+    fillSpiritDetail();
+  };
+  owned.input.addEventListener("change", () =>
+    save({ owned: owned.input.checked, mastered: owned.input.checked && mastered.input.checked }));
+  mastered.input.addEventListener("change", () =>
+    save({ owned: mastered.input.checked || owned.input.checked, mastered: mastered.input.checked }));
+  checks.replaceChildren(owned.wrapper, mastered.wrapper);
+
+  const body = $("sd-body");
+  body.replaceChildren();
+  const info = DETAILS.map[spirit.spriteId];
+  if (!info) {
+    body.append(el("p", "sd-empty", t("detail.noInfo")));
+  } else {
+    const [bonus, descs, place, cost, chest] = info;
+    if (bonus >= 0) {
+      const section = el("div", "sd-section sd-bonus");
+      section.append(el("h3", null, t("detail.variantBonus")), el("p", null, detailText(bonus)));
+      body.append(section);
+    }
+    if (descs.length) {
+      const section = el("div", "sd-section");
+      section.append(el("h3", null, t("detail.ability")));
+      descs.forEach(i => section.append(el("p", null, detailText(i))));
+      body.append(section);
+    }
+    const facts = el("div", "sd-facts");
+    const fact = (label, value) => {
+      const row = el("div", "sd-fact");
+      row.append(el("span", null, label), el("b", null, value));
+      facts.append(row);
+    };
+    if (place >= 0) fact(t("detail.location"), detailText(place));
+    if (cost && cost !== "0") fact(t("detail.summonCost"), detailNumber(cost));
+    if (chest && chest !== "0%") fact(t("detail.chestChance"), detailNumber(chest));
+    if (facts.childElementCount) body.append(facts);
+  }
+  $("sd-link").href = `https://fortnite.gg/sprites/${spirit.spriteId}`;
+}
+
+$("sd-close").addEventListener("click", () => $("spirit-detail").close());
+// clic sur le fond sombre autour de la fiche : on ferme
+$("spirit-detail").addEventListener("click", event => {
+  if (event.target === event.currentTarget) event.currentTarget.close();
+});
+
+/* ---------- Langue (FR / EN) ---------- */
+
+function refreshLanguageButtons() {
+  document.querySelectorAll(".lang-switch [data-lang]").forEach(button => {
+    const active = button.dataset.lang === window.I18N.lang;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+
+document.querySelectorAll(".lang-switch [data-lang]").forEach(button =>
+  button.addEventListener("click", () => window.I18N.set(button.dataset.lang)));
+
+window.addEventListener("langchange", () => {
+  refreshLanguageButtons();
+  populateFilters();                 // noms des raretés et des saisons
+  chipRenderers.forEach(render => render());
+  renderSpirits();
+  if ($("spirit-detail").open) fillSpiritDetail();
+  const report = $("scan-report");   // rapport de scan : dans l'ancienne langue, on le referme
+  if (!report.hidden) report.hidden = true;
+});
+
+window.I18N.apply();
+refreshLanguageButtons();
+chipRenderers.forEach(render => render()); // libellés du tri, déjà traduits
 
 /* ---------- Démarrage ---------- */
 

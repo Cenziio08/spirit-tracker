@@ -15,14 +15,26 @@ const box = document.getElementById("sync");
 if (config && box && window.SpiritProgress) {
   start().catch(error => {
     console.error(error);
-    showStatus("La synchronisation n'a pas pu démarrer (connexion ?).");
+    showStatus("sync.startError");
   });
 }
 
-function showStatus(text) {
+// Message d'état, gardé sous forme de clé pour être retraduit si on change de langue
+let lastStatus = null;
+function showStatus(key, vars) {
+  lastStatus = [key, vars];
   const el = document.getElementById("sync-status");
-  if (el) el.textContent = text;
+  if (el) el.textContent = window.I18N.t(key, vars);
 }
+let lastSignedIn = false;
+function showBackupText() {
+  const backupText = document.getElementById("backup-text");
+  if (backupText) backupText.textContent = window.I18N.t(lastSignedIn ? "backup.synced" : "backup.local");
+}
+window.addEventListener("langchange", () => {
+  if (lastStatus) showStatus(...lastStatus);
+  showBackupText();
+});
 
 // possédé/maîtrisé de l'un OU de l'autre
 function merge(a, b) {
@@ -37,7 +49,7 @@ function merge(a, b) {
   return out;
 }
 
-const time = () => new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+const time = () => new Date().toLocaleTimeString(window.I18N.lang === "fr" ? "fr-FR" : "en-GB", { hour: "2-digit", minute: "2-digit" });
 
 async function start() {
   box.hidden = false;
@@ -63,7 +75,7 @@ async function start() {
         await auth.signInWithRedirect(authInstance, provider);
       } else if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
         console.error(error);
-        showStatus("Connexion impossible : " + (error.code || error.message));
+        showStatus("sync.loginError", { code: error.code || error.message });
       }
     }
   });
@@ -85,14 +97,10 @@ async function start() {
     signInButton.hidden = !!user;
     signOutButton.hidden = !user;
     who.textContent = user ? (user.email || user.displayName || "") : "";
-    const backupText = document.getElementById("backup-text");
-    if (backupText) {
-      backupText.textContent = user
-        ? "Ta progression est sauvegardée en ligne avec ton compte Google et suit tous tes appareils. L'export reste possible pour garder une copie en fichier."
-        : "Ta progression est enregistrée dans ce navigateur. Connecte-toi avec Google pour la retrouver sur tous tes appareils, ou exporte-la en fichier.";
-    }
+    lastSignedIn = !!user;
+    showBackupText();
     if (!user) {
-      showStatus("Connecte-toi avec Google pour retrouver ta progression sur tous tes appareils.");
+      showStatus("sync.prompt");
       return;
     }
 
@@ -104,15 +112,15 @@ async function start() {
           data: JSON.stringify(window.SpiritProgress.get()),
           updatedAt: store.serverTimestamp()
         });
-        showStatus(`✓ Synchronisé (${time()})`);
+        showStatus("sync.ok", { time: time() });
       } catch (error) {
         console.error(error);
-        showStatus("⚠️ Pas synchronisé (hors connexion ?). Ça repartira tout seul.");
+        showStatus("sync.offline");
       }
     };
 
     // 1) fusion de l'appareil et de la version en ligne
-    showStatus("Synchronisation…");
+    showStatus("sync.working");
     try {
       const snap = await store.getDoc(ref);
       const remote = snap.exists() ? JSON.parse(snap.data().data || "{}") : {};
@@ -121,12 +129,12 @@ async function start() {
       await push();
     } catch (error) {
       console.error(error);
-      showStatus("⚠️ Synchronisation impossible pour l'instant : " + (error.code || error.message));
+      showStatus("sync.failed", { code: error.code || error.message });
     }
 
     // 2) envoi des changements faits ici (regroupés, 1 s après le dernier)
     window.SpiritProgress.onSave = () => {
-      showStatus("Synchronisation…");
+      showStatus("sync.working");
       pending = true;
       clearTimeout(pushTimer);
       pushTimer = setTimeout(push, 1000);
@@ -140,7 +148,7 @@ async function start() {
       // un changement fait ici est en attente d'envoi : c'est lui qui gagne
       if (pending) return;
       window.SpiritProgress.replace(JSON.parse(text));
-      showStatus(`✓ Mis à jour depuis un autre appareil (${time()})`);
+      showStatus("sync.remote", { time: time() });
     }, error => console.error(error));
   });
 }

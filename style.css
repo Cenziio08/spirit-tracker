@@ -152,11 +152,50 @@ header {
   position: relative;
 }
 
-.theme-picker {
+/* outils en haut à droite : langue + thème */
+.header-tools {
   position: absolute;
   top: 12px;
   right: 12px;
   z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-picker {
+  position: relative;
+}
+
+.lang-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--panel) 70%, transparent);
+}
+
+.lang-switch button {
+  padding: 5px 9px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.lang-switch button:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--text);
+  transform: none;
+}
+
+.lang-switch button.active,
+.lang-switch button.active:hover:not(:disabled) {
+  background: var(--text);
+  color: var(--bg);
 }
 
 .theme-toggle {
@@ -1224,9 +1263,22 @@ select {
     display: none;
   }
 
-  .theme-picker {
+  .header-tools {
     top: 8px;
     right: 8px;
+    gap: 6px;
+  }
+
+  .lang-switch button {
+    padding: 4px 7px;
+    font-size: 12px;
+  }
+}
+
+/* titre un peu plus petit sur téléphone, pour laisser la place aux boutons */
+@media (max-width: 480px) {
+  header {
+    padding-top: 52px;
   }
 }
 
@@ -1565,4 +1617,185 @@ select {
 .sync button {
   padding: 10px 14px;
   font-size: 14px;
+}
+
+/* ---------- Fiche d'un esprit (clic sur la carte) ---------- */
+
+.opens-detail {
+  cursor: pointer;
+}
+
+.card h3.opens-detail:hover {
+  text-decoration: underline;
+}
+
+.card-art.opens-detail:focus-visible {
+  outline: 2px solid var(--accent-hover);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
+.spirit-detail {
+  --rarity: var(--rarity-unknown);
+  width: min(560px, calc(100vw - 24px));
+  max-height: calc(100vh - 32px);
+  padding: 22px;
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 25% 0%,
+      color-mix(in srgb, var(--rarity) 25%, transparent),
+      transparent 60%),
+    var(--bg);
+  color: var(--text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.spirit-detail.owned {
+  border-color: #32cd32;
+}
+
+.spirit-detail.mastered {
+  border-color: #fce51e;
+}
+
+.spirit-detail::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.sd-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.sd-top {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding-right: 30px;
+}
+
+.sd-art {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.sd-art img {
+  display: block;
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.45));
+}
+
+.sd-art .mastery-crown {
+  width: 44px;
+  height: 30px;
+}
+
+.spirit-detail.mastered .sd-art .mastery-crown {
+  display: block;
+}
+
+.sd-head h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.sd-head .checks {
+  margin-top: 8px;
+  padding-top: 0;
+}
+
+.sd-body {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.sd-section h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.sd-section p {
+  margin: 0 0 6px;
+  line-height: 1.45;
+}
+
+.sd-bonus {
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--gold) 10%, transparent);
+}
+
+.sd-bonus h3 {
+  color: var(--gold);
+}
+
+.sd-facts {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  border: 1px solid var(--border);
+}
+
+.sd-fact {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.sd-fact span {
+  color: var(--muted);
+}
+
+.sd-fact b {
+  text-align: right;
+}
+
+.sd-empty {
+  color: var(--muted);
+}
+
+.sd-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.sd-foot a {
+  color: var(--accent-text);
+}
+
+@media (max-width: 480px) {
+  .spirit-detail {
+    padding: 18px 16px;
+  }
+
+  .sd-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .sd-art img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .sd-head h2 {
+    font-size: 21px;
+  }
 }

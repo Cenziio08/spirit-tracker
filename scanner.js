@@ -902,7 +902,8 @@
 
     for (let f = 0; f < files.length; f++) {
       const file = files[f];
-      const label = `Analyse de ${file.name || "l'image " + (f + 1)}…`;
+      const tr = (k, v) => (window.I18N ? window.I18N.t(k, v) : k);
+      const label = file.name ? tr("scan.file", { name: file.name }) : tr("scan.fileN", { n: f + 1 });
       onProgress(f / files.length, label);
       await nextFrame();
 
@@ -946,7 +947,7 @@
     }
     // un esprit reconnu de façon sûre sur une autre image n'est plus "à vérifier"
     found.forEach((_, key) => doubtful.delete(key));
-    onProgress(1, "Analyse terminée");
+    onProgress(1, window.I18N ? window.I18N.t("scan.finished") : "Analyse terminée");
     return { found, doubtful: [...doubtful.values()], unknown, files: files.length, cells: cellsTotal };
   }
 

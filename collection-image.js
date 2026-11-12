@@ -213,9 +213,9 @@
     ctx.fillText("SPIRIT TRACKER", W / 2, 58);
     ctx.fillStyle = T.accentText;
     ctx.font = "18px system-ui, 'Segoe UI', Arial, sans-serif";
-    ctx.fillText(seasonFilter.value ? seasonLabel(seasonFilter.value) : "Toutes les saisons", W / 2, 88);
-    statPill(ctx, W / 2 - 160, 106, owned, list.length, "POSSÉDÉS", T);
-    statPill(ctx, W / 2 + 10, 106, mastered, list.length, "MAÎTRISÉS", T);
+    ctx.fillText(seasonFilter.value ? seasonLabel(seasonFilter.value) : t("image.allSeasons"), W / 2, 88);
+    statPill(ctx, W / 2 - 160, 106, owned, list.length, t("image.owned"), T);
+    statPill(ctx, W / 2 + 10, 106, mastered, list.length, t("image.mastered"), T);
 
     // esprits
     const icons = await Promise.all(list.map(loadIcon));
@@ -244,7 +244,7 @@
     ctx.textAlign = "center";
     ctx.fillStyle = T.muted;
     ctx.font = "15px system-ui, 'Segoe UI', Arial, sans-serif";
-    const date = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+    const date = new Date().toLocaleDateString(window.I18N.lang === "fr" ? "fr-FR" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
     ctx.fillText(`cenziio08.github.io/spirit-tracker · ${date}`, W / 2, H - 30);
 
     return canvas;
@@ -253,11 +253,11 @@
   async function downloadCollectionImage(button) {
     const label = button.textContent;
     button.disabled = true;
-    button.textContent = "Création de l'image…";
+    button.textContent = t("share.creating");
     try {
       const canvas = await buildImage();
       if (!canvas) {
-        toast("Aucun esprit à mettre dans l'image pour cette saison.");
+        toast(t("share.empty"));
         return;
       }
       // JPEG : bien plus léger et rapide à créer qu'un PNG pour ce genre d'image
@@ -268,7 +268,7 @@
       // téléphone : feuille de partage (Enregistrer l'image, Snapchat…)
       if (navigator.canShare?.({ files: [file] })) {
         try {
-          await navigator.share({ files: [file], title: "Ma collection d'esprits" });
+          await navigator.share({ files: [file], title: t("share.title") });
           return;
         } catch (e) {
           if (e.name === "AbortError") return;
@@ -279,13 +279,11 @@
       link.download = name;
       link.click();
       setTimeout(() => URL.revokeObjectURL(link.href), 10000);
-      toast("Image téléchargée !");
+      toast(t("share.done"));
     } catch (error) {
       console.error(error);
       // page ouverte en double-cliquant sur index.html : le navigateur bloque
-      toast(location.protocol === "file:"
-        ? "Impossible ici : ouvre le site en ligne pour télécharger l'image."
-        : "Impossible de créer l'image, réessaie.");
+      toast(location.protocol === "file:" ? t("share.fileProtocol") : t("share.error"));
     } finally {
       button.disabled = false;
       button.textContent = label;
