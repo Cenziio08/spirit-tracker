@@ -353,6 +353,55 @@
     }
   };
 
+  // Noms français des esprits, tels qu'affichés dans le jeu en français.
+  // Seulement ceux dont le nom officiel est connu (sources : le jeu, playnews.gg,
+  // fortnite.bte.ar) ; les autres gardent leur nom d'origine.
+  // Clé = "parent" de spirits-data.js.
+  const NAMES_FR = {
+    // Chapitre 7 – Saison 3
+    Water: "Esprit de l'eau",
+    Earth: "Esprit de la terre",
+    Spitfire: "Esprit du feu",
+    Duck: "Esprit de canard",
+    Ghost: "Esprit fantôme",
+    Sleepy: "Esprit onirique",
+    Demon: "Esprit démoniaque",
+    King: "Esprit royal",
+    ZeroPoint: "Esprit du point zéro",
+    Fishy: "Poiscaille",
+    Soccer: "Foot",
+    Grim: "La Faucheuse",
+    // Chapitre 7 – Saison 4
+    WinnerE: "Esprit du miel",
+    // Chapitre 7 – Mini-saison (Chasse aux trésors)
+    PeelyBones: "Frécinette pelée",
+    Parrot: "Pierroquet",
+    BarrelOfFish: "Barry O'Poisson",
+    Compass: "Nordbert",
+    TreasureChest: "Orlando",
+    UnbotheredFish: "Carpe diem",
+    TreasureMap: "Marqueswell",
+    Squibbly: "Mini Crapoulpe",
+    FeedJet: "Escargophone",
+    StarLight: "Esprit des songes sereins",
+    CoinPile: "Tador"
+  };
+
+  // Noms français des variantes (au masculin : « un esprit doré »)
+  const VARIANTS_FR = {
+    base: "Base",
+    gold: "Doré",
+    candy: "Gélifié",
+    galaxy: "Galactique",
+    gem: "Gemme",
+    holofoil: "Iridescent",
+    cube: "Cubique",
+    quack: "Canardesque",
+    tricktreat: "Farce ou friandise",
+    jeweled: "Chanceux",
+    cursed: "Maudit"
+  };
+
   const KEY = "spirit-tracker-lang";
   let lang = "fr";
   try {
@@ -396,5 +445,5 @@
   }
 
   document.documentElement.lang = lang;
-  window.I18N = { t, typo, apply, set, get lang() { return lang; }, DICT };
+  window.I18N = { t, typo, apply, set, get lang() { return lang; }, DICT, NAMES_FR, VARIANTS_FR };
 })();

@@ -136,12 +136,29 @@ function rarityOrder(rarity) {
   return RARITIES[rarity]?.order ?? 99;
 }
 
+// Nom affiché : nom français officiel en mode français, s'il est connu
 function displayName(spirit) {
+  if (window.I18N.lang === "fr" && window.I18N.NAMES_FR[spirit.parent]) {
+    return window.I18N.NAMES_FR[spirit.parent];
+  }
   return spirit.name || prettyName(spirit.parent);
 }
 
-function variantLabel(variant) {
+// Nom de la variante ; en français, l'or de la mini-saison est l'« Or liquide »
+function variantLabel(variant, season) {
+  if (window.I18N.lang === "fr") {
+    if (variant === "gold" && /ms$/.test(season || "")) return "Or liquide";
+    if (window.I18N.VARIANTS_FR[variant]) return window.I18N.VARIANTS_FR[variant];
+  }
   return VARIANTS[variant] || capitalize(prettyName(variant));
+}
+
+// Nom complet d'une variante, comme dans le jeu : « Esprit du miel (Farce ou friandise) »
+function fullName(spirit) {
+  if (spirit.variant === "base") return displayName(spirit);
+  return window.I18N.lang === "fr"
+    ? `${displayName(spirit)} (${variantLabel(spirit.variant, spirit.season)})`
+    : `${variantLabel(spirit.variant, spirit.season)} ${displayName(spirit)}`;
 }
 
 // "c7s3" -> "Ch. 7 S3", "c7ms" -> "Ch. 7 Mini-saison" / "Ch. 7 Mini Season"
@@ -361,7 +378,11 @@ function getVisibleSpirits() {
     const text = [
       spirit.parent,
       prettyName(spirit.parent),
+      spirit.name,
+      window.I18N.NAMES_FR[spirit.parent] || "",
       displayName(spirit),
+      VARIANTS[spirit.variant] || "",
+      window.I18N.VARIANTS_FR[spirit.variant] || "",
       spirit.variant,
       variantLabel(spirit.variant),
       spirit.rarity,
@@ -485,7 +506,7 @@ function createCard(spirit) {
 
   const variant = document.createElement("span");
   variant.className = "tag";
-  variant.textContent = variantLabel(spirit.variant);
+  variant.textContent = variantLabel(spirit.variant, spirit.season);
 
   tags.append(rarity, variant);
 
@@ -844,7 +865,7 @@ function appendDoubtful(report, result) {
     img.src = d.thumb;
     img.alt = "";
     const name = el("div", "scan-tile-name",
-      `${displayName(d.spirit)}${d.spirit.variant !== "base" ? " · " + variantLabel(d.spirit.variant) : ""} ?`);
+      `${fullName(d.spirit)} ?`);
     // la couronne est elle aussi incertaine sur ces images : on laisse choisir
     const buttons = el("div", "scan-confirm-row");
     const confirm = mastered => {
@@ -924,7 +945,7 @@ function showScanReport(result, rows, info) {
   if (missing.length && missing.length <= 40) {
     report.append(el("p", "scan-note", t("scan.notSeen", {
       n: missing.length,
-      list: missing.map(s => `${displayName(s)}${s.variant !== "base" ? " " + variantLabel(s.variant) : ""}`).join(", ")
+      list: missing.map(fullName).join(", ")
     })));
   }
 
@@ -942,7 +963,7 @@ function showScanReport(result, rows, info) {
       img.src = item.thumb;
       img.alt = "";
       const label = el("div", "scan-tile-name",
-        `${displayName(spirit)}${spirit.variant !== "base" ? " · " + variantLabel(spirit.variant) : ""}`);
+        fullName(spirit));
       const badge = el("div", "scan-tile-badge",
         mastered ? t("scan.mastered") : t("scan.owned"));
       if (isNewMastered || isNewOwned) badge.append(el("span", "scan-new", t("scan.new")));
@@ -1302,7 +1323,6 @@ function fillSpiritDetail() {
   if (!spirit) return;
   const state = getState(spirit);
   const name = displayName(spirit);
-  const variant = spirit.variant !== "base" ? ` ${variantLabel(spirit.variant)}` : "";
 
   const img = $("sd-img");
   img.onerror = () => { if (spirit.remoteUrl && img.src !== spirit.remoteUrl) img.src = spirit.remoteUrl; };
@@ -1312,11 +1332,11 @@ function fillSpiritDetail() {
   box.className = `spirit-detail rarity-${spirit.rarity || "unknown"}`;
   box.classList.toggle("owned", state.owned);
   box.classList.toggle("mastered", state.mastered);
-  $("sd-name").textContent = name + variant;
+  $("sd-name").textContent = fullName(spirit);
 
   const tags = $("sd-tags");
   tags.replaceChildren(el("span", "tag rarity-tag", rarityLabel(spirit.rarity)),
-    el("span", "tag", variantLabel(spirit.variant)));
+    el("span", "tag", variantLabel(spirit.variant, spirit.season)));
   if (spirit.unreleased) tags.append(el("span", "tag upcoming-tag", t("card.upcoming")));
   if (spirit.season) tags.append(el("span", "tag", seasonLabel(spirit.season)));
 
