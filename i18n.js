@@ -72,10 +72,12 @@
       "scan.summary": v => `${v.n} esprit${s(v.n)} reconnu${s(v.n)} sur ${v.files} image${s(v.files)}`,
       "scan.added": v => ` — +${v.owned} possédé${s(v.owned)}, +${v.mastered} maîtrisé${s(v.mastered)} ajouté${s(v.owned + v.mastered)} à ta collection.`,
       "scan.undo": "Annuler",
-      "scan.undone": "Scan annulé : ta progression est revenue comme avant.",
+      "scan.undone": "Scan annulé : ta progression est revenue à son état d'avant.",
       "scan.close": "Fermer le rapport",
-      "scan.cutTop": v => `${v.n} esprit${s(v.n)} ${v.n > 1 ? "étaient coupés" : "était coupé"} en haut de la capture : leur couronne n'était pas visible. Ils sont cochés « Possédé » ; vérifie leur maîtrise ou ajoute une capture où ils sont entiers.`,
-      "scan.notSeen": v => `Pas vu dans tes captures (${v.n}) : ${v.list}. Si tu les as, ajoute une capture de l'endroit où ils apparaissent.`,
+      "scan.cutTop": v => v.n > 1
+        ? `${v.n} esprits étaient coupés en haut de la capture : leur couronne n'était pas visible. Ils sont cochés « Possédé » ; vérifie leur maîtrise ou ajoute une capture où ils apparaissent en entier.`
+        : "1 esprit était coupé en haut de la capture : sa couronne n'était pas visible. Il est coché « Possédé » ; vérifie sa maîtrise ou ajoute une capture où il apparaît en entier.",
+      "scan.notSeen": v => `Absents de tes captures (${v.n}) : ${v.list}. Si tu les as, ajoute une capture de l'endroit où ils apparaissent.`,
       "scan.details": "Voir le détail des esprits reconnus",
       "scan.owned": "✓ Possédé",
       "scan.mastered": "👑 Maîtrisé",
@@ -89,7 +91,7 @@
       "scan.added1": "✓ Ajouté",
       "scan.addedCrown": "👑 Ajouté",
 
-      "search.placeholder": "Rechercher un esprit...",
+      "search.placeholder": "Rechercher un esprit…",
       "filter.season": "Saison",
       "filter.status": "Statut",
       "filter.rarity": "Rareté",
@@ -107,7 +109,7 @@
       "sort.season": "Saison",
       "sort.status": "À faire d'abord",
 
-      "list.loading": "Chargement du catalogue...",
+      "list.loading": "Chargement du catalogue…",
       "list.count": v => `${v.n} esprit${s(v.n)} affiché${s(v.n)} sur ${v.total}.`,
       "list.empty": "Aucun esprit ne correspond à ta recherche.",
       "card.owned": "Possédé",
@@ -129,7 +131,7 @@
       "detail.ability": "Ce qu'il fait",
       "detail.location": "Où le trouver",
       "detail.summonCost": "Coût d'invocation",
-      "detail.chestChance": "Chance dans un coffre à esprits",
+      "detail.chestChance": "Probabilité dans un coffre à esprits",
       "detail.noInfo": "Pas encore d'informations sur cet esprit.",
 
       "backup.title": "Sauvegarde",
@@ -161,7 +163,7 @@
       "sync.loginError": v => `Connexion impossible : ${v.code}`,
       "sync.prompt": "Connecte-toi avec Google pour retrouver ta progression sur tous tes appareils.",
       "sync.ok": v => `✓ Synchronisé (${v.time})`,
-      "sync.offline": "⚠️ Pas synchronisé (hors connexion ?). Ça repartira tout seul.",
+      "sync.offline": "⚠️ Pas synchronisé (hors connexion ?). La synchronisation reprendra toute seule.",
       "sync.working": "Synchronisation…",
       "sync.failed": v => `⚠️ Synchronisation impossible pour l'instant : ${v.code}`,
       "sync.remote": v => `✓ Mis à jour depuis un autre appareil (${v.time})`,
@@ -178,7 +180,7 @@
       "custom.glass": "Cartes transparentes",
       "custom.reset": "Revenir au violet",
       "custom.done": "Terminé",
-      "custom.badImage": "Impossible d'utiliser cette image, essaie une autre."
+      "custom.badImage": "Impossible d'utiliser cette image, choisis-en une autre."
     },
 
     en: {
