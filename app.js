@@ -1366,7 +1366,6 @@ function fillSpiritDetail() {
     if (chest && chest !== "0%") fact(t("detail.chestChance"), detailNumber(chest));
     if (facts.childElementCount) body.append(facts);
   }
-  $("sd-link").href = `https://fortnite.gg/sprites/${spirit.spriteId}`;
 }
 
 $("sd-close").addEventListener("click", () => $("spirit-detail").close());

@@ -132,7 +132,6 @@
       "detail.chestChance": "Chance dans un coffre à esprits",
       "detail.noInfo": "Pas encore d'informations sur cet esprit.",
       "detail.source": "Infos : fortnite.gg",
-      "detail.more": "Voir sur fortnite.gg",
 
       "backup.title": "Sauvegarde",
       "backup.local": "Ta progression est enregistrée dans ce navigateur. Connecte-toi avec Google pour la retrouver sur tous tes appareils, ou exporte-la en fichier.",
@@ -303,7 +302,6 @@
       "detail.chestChance": "Sprite Chest drop chance",
       "detail.noInfo": "No information about this sprite yet.",
       "detail.source": "Info: fortnite.gg",
-      "detail.more": "View on fortnite.gg",
 
       "backup.title": "Backup",
       "backup.local": "Your progress is saved in this browser. Sign in with Google to get it on all your devices, or export it to a file.",
