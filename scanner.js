@@ -619,10 +619,10 @@
           if (mask[r] && !seen[r]) { seen[r] = 1; stack.push(r); }
         }
       }
-      // teinte dorée de la couronne (~23-27) : écarte la coche "équipé" (~31)
-      // et les reflets orangés (~17)
+      // teinte dorée de la couronne (~23-27, jusqu'à ~29 sur ses parties
+      // claires) : écarte la coche "équipé" (~31) et les reflets orangés (~17)
       const hue = hueSum / area;
-      if (area >= minArea && hue >= 20.5 && hue < 28.5) count += area;
+      if (area >= minArea && hue >= 20.5 && hue < 29.5) count += area;
     }
     return count >= CROWN_MIN_RATIO * si * si;
   }
